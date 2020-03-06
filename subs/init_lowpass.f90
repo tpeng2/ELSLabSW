@@ -1,0 +1,19 @@
+        tstart = time 
+        tstop = tstart + 8.*86400.
+        tcenter = (tstart + tstop)/2.
+        w_filtered(:,:) = 0.
+        p_filtered(:,:) = 0.
+        u1_filtered(:,:) = 0.
+        v1_filtered(:,:) = 0.
+        u2_filtered(:,:) = 0.
+        v2_filtered(:,:) = 0.
+        Uek_filtered(:,:) = 0.
+        eta_filtered(:,:) = 0.
+        w_avg(:,:) = 0.
+        w_avg1(:,:) = 0.
+        p_avg(:,:) = 0.
+        p_avg1(:,:) = 0.
+        wp_avg(:,:) = 0.
+        wp_avg1(:,:) = 0.
+        diag_wp = .true.
+
