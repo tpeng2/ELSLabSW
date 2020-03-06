@@ -6,6 +6,7 @@
 | File name name | Description | 
 | --- | --- |
 | `./parameters.f90` | parameter files |
+| `amp_matrix` | Transient forcing (psuedo-stochastic)  |
 
 - Subroutines
 
@@ -68,3 +69,24 @@ Logical parameters
 The parameter file is named as `parameters.f90`.
 
 ## Program structure
+### 1. Configuration
+- Calculate Rossiby length
+- Determine time step
+- Determine if the forcing is steady or not, if transient read `amp_matrix`.
+
+### 2. Initialization  
+Initialize following variables:
+* pressure  
+* thickness for two layers
+* horizontal u, `uu(:.:)`
+* meridional v, `vv(:.:)`
+* old horizontal u, `uu_old(:.:)`
+* old meridional v, `vv_old(:.:)`
+* Slab current U_ek,
+* Ekman transport V_ek
+
+Then, calculate RHS for the first time step.
+
+Finally, correct u,v for surface pressure: call    `subs/p_correction.f90`.
+
+### 3. Subsequent time steps
