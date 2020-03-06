@@ -1,1 +1,1 @@
-ifort -O3 -o exec main.f90  -Lusr/include -lfftw3
+ifort -O3 -o ./build/exec main.f90  -Lusr/include -lfftw3

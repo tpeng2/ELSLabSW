@@ -1,4 +1,4 @@
-
+! Two-dimensional periodic boundary conditions
 
        array(:,0) = array(:,ny)
        array(:,ny+1) = array(:,1)
