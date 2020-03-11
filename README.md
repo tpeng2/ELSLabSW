@@ -68,6 +68,31 @@ Logical parameters
 
 The parameter file is named as `parameters.f90`.
 
+## Parameter file setting
+
+## Discretizations
+### Spatial: Finite difference with staggered grids
+See `./subs/rhs.f90` and `./main.f90`
+
+* Relative location given indices (i,j)
+| `u`| `eta` (div)|
+| `zeta` | `v` |
+
+- variables in the same row share the same `j` index
+- variables in the same line share the same `i` index
+
+
+### Temporal: Leap frog
+Central time central space
+| time (n) / location (m) | m-1 | m | m+1 |
+| --- | --- | --- |
+| n-1 | o |  `+` |  o |
+|  n  | `+` |  `*` |  `+` |
+| n+1 | o |  `+` |  o |
+
+- Current variable: `*`
+- Dependent variable: `+`
+
 ## Program structure
 ### 1. Configuration
 - Calculate Rossiby length
