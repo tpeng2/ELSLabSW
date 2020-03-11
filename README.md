@@ -91,10 +91,11 @@ Central time central space
 | --- | --- | --- |--- |
 | *n-1* | o |  `+` |  o |
 |  *n*  | `+` |  `*` |  `+` |
-| *n+1* | o |  `+` |  o |
+| *n+1* | o |  `X` |  o |
 
 - Current variable: `*`
 - Dependent variable: `+`
+- Predicting variable: `X`
 
 ## Program structure
 ### 1. Configuration
