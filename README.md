@@ -75,6 +75,8 @@ The parameter file is named as `parameters.f90`.
 See `./subs/rhs.f90` and `./main.f90`
 
 * Relative location given indices (i,j)
+
+| --- | --- | 
 | `u`| `eta` (div)|
 | `zeta` | `v` |
 
