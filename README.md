@@ -87,7 +87,7 @@ See `./subs/rhs.f90` and `./main.f90`
 ### Temporal: Leap frog
 Central time central space
 | time (n) / location (m) | m-1 | m | m+1 |
-| --- | --- | --- |
+| --- | --- | --- |--- |
 | n-1 | o |  `+` |  o |
 |  n  | `+` |  `*` |  `+` |
 | n+1 | o |  `+` |  o |
