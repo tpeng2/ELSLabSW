@@ -76,6 +76,7 @@ See `./subs/rhs.f90` and `./main.f90`
 
 * Relative location given indices (i,j)
 
+|  |  | 
 | --- | --- | 
 | `u`| `eta` (div)|
 | `zeta` | `v` |
@@ -86,11 +87,11 @@ See `./subs/rhs.f90` and `./main.f90`
 
 ### Temporal: Leap frog
 Central time central space
-| time (n) / location (m) | m-1 | m | m+1 |
+| time (n) / location (m) | *m-1* | *m* | *m+1* |
 | --- | --- | --- |--- |
-| n-1 | o |  `+` |  o |
-|  n  | `+` |  `*` |  `+` |
-| n+1 | o |  `+` |  o |
+| *n-1* | o |  `+` |  o |
+|  *n*  | `+` |  `*` |  `+` |
+| *n+1* | o |  `+` |  o |
 
 - Current variable: `*`
 - Dependent variable: `+`
@@ -117,3 +118,6 @@ Then, calculate RHS for the first time step.
 Finally, correct u,v for surface pressure: call    `subs/p_correction.f90`.
 
 ### 3. Subsequent time steps
+- Computing RHS of *u*, *v*, and *eta*
+* *u* and *v* in Bernourlli forms: e.g., `rhs_u`= `dB/dx`+`(f+zeta)*v` + `Biharmonic hyperviscosity` + `Inverse Laplacian for damping low-frequency (barotropic mode)` + `linear drag from bottom (when k=2)` 
+* *eta* equation: `rhs_eta` = `-(d(u_h)/dx+-d(v_h)/dy)`+ `stress (body-force, when alpha=1)`
