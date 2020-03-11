@@ -24,7 +24,7 @@
 
 - FFT library
 
-| File name name | Description | 
+| File  name | Description | 
 | --- | --- |
 | `./fftw_stuff/fft_params.f90` | fft params files | 
 | `./fftw_stuff/fft_init.f90` | fft init files | 
@@ -33,8 +33,8 @@
 
 - Output file
 
-| File name name | Description | 
-| --- | --- | --- |
+| File name  | Description | 
+| --- | --- | 
 | `./ke1_spec` | Output | 
 | `./ke_ek_spec` | Output | 
 | `./ke2_spec` | Output | 
