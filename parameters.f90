@@ -8,7 +8,7 @@
 
   parameter ( Lx = 2.0e6, Ly = Lx )
 
-  parameter ( nx = 2**9, ny = 2**9, nz = 2 )
+  parameter ( nx = 2**8, ny = 2**8, nz = 2 )
 
   parameter ( dx = Lx/nx, dy = Ly/ny )
 
@@ -31,23 +31,23 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 25. )   
+  parameter ( hek = 50. )   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( totaltime = 86400 * 9. )
+  parameter ( totaltime = 86400 * 100. )
 
   parameter ( nsteps = totaltime/dt )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = 2*nsteps/3  , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/5  , i_diags = ifix(86400./16/dt) )
 
   parameter ( start_movie = 7.*nsteps/6. )
 
-  parameter ( ifsteady = .false. )
+  parameter ( ifsteady = .true. )
 
-!  parameter ( restart = .true. , use_ramp = .false. )
-  parameter ( restart = .false. , use_ramp = .true. )
+  parameter ( restart = .false. , use_ramp = .false. )
+!  parameter ( restart = .false. , use_ramp = .false. )
 

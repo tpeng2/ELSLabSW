@@ -1,16 +1,23 @@
 # ELSLabSW
+Slab model + Two-layer shallow water equations
+
+| Model name | Coupled? (alpha) | self-advective  |
+| --- | --- | --- |
+| T | No (alpha=0) | N/A  |
+| C1 | Yes (alpha=1) |  No (`hek` set to a very large number)  |
+| C2 | Yes (alpha=1) | Yes  |
 
 ## Dependent files
 - Parameters and input
 
-| File name name | Description | 
+| File  name | Description | 
 | --- | --- |
 | `./parameters.f90` | parameter files |
 | `amp_matrix` | Transient forcing (psuedo-stochastic)  |
 
 - Subroutines
 
-| File name name | Description | 
+| File  name | Description | 
 | --- | --- |
 | `./subs/initialize.f90` | Initialization files | 
 | `./subs/rhs_ek.f90` | Computing RHS for Ekman Layer | 
@@ -67,8 +74,57 @@ Logical parameters
 |`ifsteady`| logical |  ... |
 
 The parameter file is named as `parameters.f90`.
+Misc.
+## Parameter file setting (with example values)
+| Parameter |  Value |  Note  | 
+| --- | --- | --- | 
+| `pi` | 2.*asin(1.) | pi | 
+| `twopi` | 2.*pi | 2*pi |
 
-## Parameter file setting
+Grid
+| Parameter |  Value |  Note/Unit  | 
+| --- | --- | --- | 
+| `Lx` | 2.0e6 | [m] | 
+| `Ly` | Lx | [m] | 
+| `nx` | 2**9 |  | 
+| `ny` | 2**9  |  | 
+| `nz` | 2 |  | 
+| `dx` | Lx/nx |  | 
+| `dy` | Ly/ny |  | 
+| `nnx` | nx+1 |  | 
+| `nny` | ny+1 |  | 
+
+Parameters
+| Parameter |  Value |  Note/Unit  | 
+| --- | --- | --- | 
+| `tau0` |  1.e-4 |  stress  | 
+| `tau1` |  1.e-5 |  stress  | 
+| `f0` |  7.e-5 |  Coriolis: f_0  | 
+| `beta` |  0 |  Coriolis: beta  | 
+| `r_drag` |  1.e-7 |  Linear Drag from bottom  | 
+| `r_invLap` |  1.e-6*twopi**2/Ly**2 |  Inverse-Laplacian damping coeff.  | 
+| `Ah` |  1.e-5*dx**4 |  eddy viscosity  | 
+| `rf` |  0.001 |    | 
+| `c_bc` |  2. |    | 
+| `h_ek` |  50. |  Ekman layer depth   | 
+
+Time
+|Parameter |  Value |  Note/Unit  | 
+| --- | --- | --- | 
+| `dt` |  300 |  time step size [s]  | 
+| `total time` |  86400 * 9 |  total time (1 day in sec * days) [s]  | 
+| ` nsteps` |  totaltime/dt |  how many steps  | 
+
+I/O
+|Parameter |  Value |  Note/Unit  | 
+| --- | --- | --- | 
+| `iout` |  nsteps/5 |  when to generate output files | 
+| `i_diags` |  ifix(86400./16/dt) |  time step size [s]  | 
+| `start_movie` |  7.*nsteps/6. |  time step when generating snapshots. no movie when > nsteps  | 
+| `ifsteady` |  .true. |  .true. for steady forcing, .false. requires output  | 
+| `restart` |  .false. |  if restart  | 
+| `use_ramp` |  .false. |  if use ramp  | 
+
 
 ## Discretizations
 ### Spatial: Finite difference with staggered grids
@@ -76,10 +132,10 @@ See `./subs/rhs.f90` and `./main.f90`
 
 * Relative location given indices (i,j)
 
-|  |  | 
-| --- | --- | 
-| `u`| `eta` (div)|
-| `zeta` | `v` |
+|   | iu | iv | 
+| --- | --- |  --- | 
+| ju | `u`| `eta` (div)|
+| jv |  `zeta` | `v` |
 
 - variables in the same row share the same `j` index
 - variables in the same line share the same `i` index
@@ -119,6 +175,13 @@ Then, calculate RHS for the first time step.
 Finally, correct u,v for surface pressure: call    `subs/p_correction.f90`.
 
 ### 3. Subsequent time steps
-- Computing RHS of *u*, *v*, and *eta*
+#### Computing RHS of *u*, *v*, and *eta*
 * *u* and *v* in Bernourlli forms: e.g., `rhs_u`= `dB/dx`+`(f+zeta)*v` + `Biharmonic hyperviscosity` + `Inverse Laplacian for damping low-frequency (barotropic mode)` + `linear drag from bottom (when k=2)` 
 * *eta* equation: `rhs_eta` = `-(d(u_h)/dx+-d(v_h)/dy)`+ `stress (body-force, when alpha=1)`
+
+#### pressure correction
+- Define: Interface height for two layers *H(k)* and *k=1,2*
+- Then *thickness = H(k) - eta* for the first layer, and *H(k)+eta* for the second layer.
+
+## I/O files
+### Writing Gnuplot files *./subs/dump_gnu.f90*
