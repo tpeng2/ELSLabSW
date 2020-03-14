@@ -37,12 +37,12 @@
 
   parameter ( dt = 300. )
  
-  parameter ( totaltime = 86400 * 100. )
+  parameter ( totaltime = 86400 * 200. )
 
   parameter ( nsteps = totaltime/dt )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/5  , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/200/8 , i_diags = ifix(86400./16/dt) )
 
   parameter ( start_movie = 7.*nsteps/6. )
 
