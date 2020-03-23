@@ -46,6 +46,7 @@
        real q(0:nnx,0:nny,nz), psi(0:nnx,0:nny,nz)
        real qmode(0:nnx,0:nny,nz), psimode(0:nnx,0:nny,nz)
        real u_out(0:nx/2+1,0:ny/2+1,nz), v_out(0:nx/2+1,0:ny/2+1,nz)
+       real Uek_out(0:nx/2+1,0:ny/2+1), Vek_out(0:nx/2+1,0:ny/2+1)
        real div_ek_out(0:nx/2+1,0:ny/2+1), eta_out(0:nx/2+1,0:ny/2+1,nz)
        real f(0:nny)
        real gprime(nz), Htot, H(nz)

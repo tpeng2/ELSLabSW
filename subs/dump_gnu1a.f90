@@ -1,6 +1,6 @@
 
-       WRITE(which,'(I4)') 100 + icount
-       string1 = 'data/wek'  // '_' // which(1:3)
+       WRITE(which,'(I0.5)') 100 + icount
+       string1 = 'data/wek'  // '_' // which(1:4)
        open(11, file = string1, status = 'unknown')
 
 

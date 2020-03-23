@@ -2,13 +2,13 @@
   eta(:,:,1,3) = Psurf(:,:)
 
   WRITE(which,'(I5)') 10000 + icount
-  
+   nbinstr=6 !check every time !Tianze  03/18/20
    string1 = 'data/u_o'  // '_' // which(1:5)
    string2 = 'data/v_o'  // '_' // which(1:5)
    string3 = 'data/eta_o'  // '_' // which(1:5)
    string4 = 'data/w_o'  // '_' // which(1:5)
-!  string5 = 'data/Uek'  // '_' // which(1:5)
-!  string6 = 'data/Vek'  // '_' // which(1:5)
+   string5 = 'data/Uek'  // '_' // which(1:5)
+   string6 = 'data/Vek'  // '_' // which(1:5)
 
 
 !  string5 = 'data/Vek'  // '_' // which(1:5)
@@ -44,8 +44,8 @@
       u_out(ii,jj,k) = u(i,j,k,3)
       v_out(ii,jj,k) = v(i,j,k,3)
       eta_out(ii,jj,k) = eta(i,j,k,3)
-!     Uek_out(ii,jj) = Uek(i,j,2)
-!     Vek_out(ii,jj) = Vek(i,j,2)
+      Uek_out(ii,jj) = Uek(i,j,2)
+      Vek_out(ii,jj) = Vek(i,j,2)
    enddo
    enddo
    enddo
@@ -74,18 +74,18 @@
         & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
 !      & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
 ! write(17,REC=1) div_ek(:,:)
-  write(17,REC=1) div_ek_out(:,:)
-  close(17)
+   write(17,REC=1) div_ek_out(:,:)
+   close(17)
   
-!  open(unit=18,file=string5,access='DIRECT',&
-!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
-!  write(18,REC=1) Uek_out(:,:)
-!  close(18)
+   open(unit=18,file=string5,access='DIRECT',&
+         & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
+   write(18,REC=1) Uek_out(:,:)
+   close(18)
   
-!  open(unit=19,file=string6,access='DIRECT',&
-!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
-!  write(19,REC=1) Vek_out(:,:)
-!  close(19)
+   open(unit=19,file=string6,access='DIRECT',&
+         & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
+   write(19,REC=1) Vek_out(:,:)
+   close(19)
   
 
 
