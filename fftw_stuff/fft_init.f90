@@ -1,5 +1,5 @@
 
-    INCLUDE '/usr/include/fftw3.f'
+    INCLUDE '/usr/local/include/fftw3.f'
 
 
     datr = 0; datc = 0

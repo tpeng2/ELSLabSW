@@ -1,4 +1,6 @@
 *.mod
 build
 exec
-test
+test*
+recycle
+params_in.f90
