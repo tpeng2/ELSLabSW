@@ -5,6 +5,7 @@
        double precision pi, twopi, Lx, Ly, dx, dy
        real f0, beta, r_drag, Ah, r_invLap, rf
        real tau0, tau1, hek
+       integer subsmpstep
        logical restart, use_ramp, ifsteady
        include 'parameters.f90'
        end module data_initial
@@ -45,8 +46,10 @@
        real tmp(0:10), array(0:nnx,0:nny)
        real q(0:nnx,0:nny,nz), psi(0:nnx,0:nny,nz)
        real qmode(0:nnx,0:nny,nz), psimode(0:nnx,0:nny,nz)
-       real u_out(0:nx/2+1,0:ny/2+1,nz), v_out(0:nx/2+1,0:ny/2+1,nz)
-       real div_ek_out(0:nx/2+1,0:ny/2+1), eta_out(0:nx/2+1,0:ny/2+1,nz)
+       real u_out(1:(nx/subsmpstep),1:(ny/subsmpstep),nz)
+       real v_out(1:(nx/subsmpstep),1:(ny/subsmpstep),nz)
+       real eta_out(1:(nx/subsmpstep),1:(ny/subsmpstep),nz)
+       real div_ek_out(1:(nx/subsmpstep),1:(ny/subsmpstep))
        real f(0:nny)
        real gprime(nz), Htot, H(nz)
        real top(nz), bot(nz), Fmode(nz)
@@ -60,6 +63,7 @@
        real*4 for_to_spec(0:nx/2), for_ag_spec(0:nx/2)
 
        integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes
+       integer isubx(1:(nx/subsmpstep)),isuby(1:(ny/subsmpstep))
        integer icount, count_specs_1, count_specs_2, count_specs_ek
        integer count_specs_to, count_specs_ag
 
@@ -71,7 +75,10 @@
         
        include 'fftw_stuff/fft_params.f90'
        include 'fftw_stuff/fft_init.f90'
-
+       ! === Define subsampling range
+       isubx=(/(i, i=1,nx, subsmpstep)/)
+       isuby=(/(i, i=1,ny, subsmpstep)/)
+       ! === 
        icount = 0
        time = 0.
        Lrossby = c_bc/f0

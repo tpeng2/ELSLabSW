@@ -31,23 +31,23 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50. )   
+  parameter ( hek = 50.e8)   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( totaltime = 86400 * 200. )
+  parameter ( totaltime = 86400 * 1000. )
 
   parameter ( nsteps = totaltime/dt )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/200/8 , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/1000/8 , i_diags = ifix(86400./16/dt) )
 
-  parameter ( start_movie = 7.*nsteps/6. )
+  parameter ( start_movie = nsteps/5. , subsmpstep=2 )
 
   parameter ( ifsteady = .true. )
 
-  parameter ( restart = .false. , use_ramp = .false. )
+  parameter ( restart = .true. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
