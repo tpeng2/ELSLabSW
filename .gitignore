@@ -4,3 +4,4 @@ exec
 test*
 recycle
 params_in.f90
+parameters.f90

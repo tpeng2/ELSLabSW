@@ -73,8 +73,10 @@
 !   --- Restart
 
        if ( restart .eqv. .false. ) then
- 
-          print*, 'Restart from zero'
+         icount = 0 !for  output file index
+         time = 0.  !in second
+         restart_from=time
+          print*, 'Restart from', restart_from, 'day'
 
           ! add seed IC
           tmp(1) = Lx/8.
@@ -93,8 +95,7 @@
        include 'subs/bndy.f90'
        eta(:,:,1,1) = array
 
-       else
-
+       else !if restart
           open(0,file='restart')
           do j = 0,nny
           do i = 0,nnx
@@ -103,8 +104,10 @@
                  &      eta(i,j,2,1)
           enddo
           enddo
+          read(0,*) icount,time
           close(0)
-!         print*, 'Restart from', restart_from
+         restart_from=time/86400
+         print*, 'Restart from', restart_from, 'day'
  
 !         if (restart_from == 999 ) then
 !            time = 0

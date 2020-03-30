@@ -5,6 +5,9 @@
        double precision pi, twopi, Lx, Ly, dx, dy
        real f0, beta, r_drag, Ah, r_invLap, rf
        real tau0, tau1, hek
+       integer nsteps,fileperday
+       real ndays,totaltime,dt
+       real restart_from
        integer subsmpstep
        logical restart, use_ramp, ifsteady
        include 'parameters.f90'
@@ -79,13 +82,15 @@
        isubx=(/(i, i=1,nx, subsmpstep)/)
        isuby=(/(i, i=1,ny, subsmpstep)/)
        ! === 
-       icount = 0
-       time = 0.
+       !set icount and time based on if restart is true or false
+      !  icount = 0 !for  output file index
+      !  time = 0.  !in second
        Lrossby = c_bc/f0
        write(*,*) 'Lrossby over Lx/2pi = ', twopi*Lrossby/Lx
        write(*,*) 'Lrossby over dx = ', Lrossby/dx
        write(*,*) 'Lrossby  = ', Lrossby/1000. , 'km'
-       write(*,*) nsteps, iout, 86400/dt
+       write(*,*) 'total step= ', nsteps
+       write(*,*) 'write output data for every',iout, 'steps, for ndays=', ndays
        write(*,*) 'one day = ', 86400/dt, 'time steps'
        write(*,*) 'dx = ', dx
 
@@ -293,8 +298,8 @@
 !                include 'subs/calc_q.f90'
                 include 'subs/diags.f90'
                 icount = icount + 1
-                print*, icount
                 include 'subs/dump_bin.f90'
+                print*, 'writing data No.', icount
              endif
           endif  !output
 
@@ -406,6 +411,7 @@
              &      eta(i,j,2,3)
        enddo
        enddo
+       write(0,*) icount,time
        close(0)
 
 

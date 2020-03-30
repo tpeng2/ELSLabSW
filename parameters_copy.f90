@@ -37,17 +37,17 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays=10., totaltime = 86400 * ndays )
+  parameter ( totaltime = 86400 * 100. )
 
-  parameter ( nsteps = totaltime/dt,fileperday=16 )
+  parameter ( nsteps = totaltime/dt )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/ndays/fileperday , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/1000/16 , i_diags = ifix(86400./16/dt) )
 
   parameter ( start_movie = 1. , subsmpstep=4 )
 
   parameter ( ifsteady = .true. )
 
-  parameter ( restart = .true. , use_ramp = .false. )
+  parameter ( restart = .false. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
