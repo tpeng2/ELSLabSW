@@ -37,12 +37,14 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays=10., totaltime = 86400 * ndays )
+  parameter ( ndays=1200., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=16 )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/ndays/fileperday , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
+ 
+  parameter (itape=86400*10/dt,ispechst=6) !spectrum output file, output one spectra per ispechst
 
   parameter ( start_movie = 1. , subsmpstep=4 )
 

@@ -8,9 +8,10 @@
        integer nsteps,fileperday
        real ndays,totaltime,dt
        real restart_from
-       integer subsmpstep
+       integer subsmpstep,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
        logical restart, use_ramp, ifsteady
        include 'parameters.f90'
+       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
        end module data_initial
 
        program main
@@ -62,15 +63,22 @@
        real amp_matrix(864000)
        real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
        real*4 tmp_out(10)
-       real*4 ke1_spec(0:nx/2), ke2_spec(0:nx/2), ke_ek_spec(0:nx/2)
-       real*4 for_to_spec(0:nx/2), for_ag_spec(0:nx/2)
+       !2-D FFT spectra
+       real*4 ke1_spec(0:nx), ke2_spec(0:nx), ke_ek_spec(0:nx)
+       real*4 for_to_spec(0:nx), for_ag_spec(0:nx)
+       !1-D spectra
+       real*4 kex1_spec(0:nx/2), kex2_spec(0:nx/2), kex_ek_spec(0:nx/2)
+       real*4 key1_spec(0:ny/2), key2_spec(0:ny/2), key_ek_spec(0:ny/2)
+       real*4 kex1_spec_tb(0:nx/2,1:ntsrow),key1_spec_tb(0:ny/2,1:ntsrow),tstime(1:ntsrow)
+       real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
+       real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
 
        integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes
        integer isubx(1:(nx/subsmpstep)),isuby(1:(ny/subsmpstep))
        integer icount, count_specs_1, count_specs_2, count_specs_ek
        integer count_specs_to, count_specs_ag
 
-       character(20) scrap, which
+       character(20) scrap, which,which2, spectbszx,spectbszy,specform, pathspects
        character(20) string1, string2, string3, string4, string5
        character(20) string6, string7, string8, string9, string10
        character(20) string11, string12, string13, string14, string15
@@ -89,9 +97,10 @@
        write(*,*) 'Lrossby over Lx/2pi = ', twopi*Lrossby/Lx
        write(*,*) 'Lrossby over dx = ', Lrossby/dx
        write(*,*) 'Lrossby  = ', Lrossby/1000. , 'km'
-       write(*,*) 'total step= ', nsteps
+       write(*,*) 'total step, nstep= ', nsteps
        write(*,*) 'write output data for every',iout, 'steps, for ndays=', ndays
        write(*,*) 'one day = ', 86400/dt, 'time steps'
+       write(*,*) 'Spectrum time series has', ntsrow, 'lines'
        write(*,*) 'dx = ', dx
 
        if ( ifsteady .eqv. .true. ) then
@@ -107,6 +116,10 @@
 !! --- Initialization !!
        include 'subs/initialize.f90'
        its=1
+       itlocal=1
+       nspecfile=0
+       write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
+       !forcing
        taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
 !==============================================================
@@ -182,6 +195,61 @@
              eta(:,:,k,2) = array
           enddo
 
+!     setups for writing spectra
+               !write 1D table heat
+          WRITE(spectbszx,'(I3)') size(kex1_spec)+1
+          specform='('//trim(spectbszx)//'e13.5)'
+          write(*,*) 'spectra-x time series length+1=',spectbszx
+          open (unit=999, file = 'specdata/ke1x.dat', form = 'formatted',access = 'sequential')
+          write(999,specform) 0.0,kx1d
+          close(999)
+
+          WRITE(spectbszy,'(I3)') size(key1_spec)+1
+          specform='('//trim(spectbszy)//'e13.5)'
+          write(*,*) 'spectra-y time series length+1=',spectbszy
+          open (unit=998, file = 'specdata/ke1y.dat', form = 'formatted',access = 'sequential')
+          write(998,specform) 0.0,ky1d
+          close(998)
+
+          WRITE(spectbszx,'(I3)') size(kex1_spec)+1
+          specform='('//trim(spectbszx)//'e13.5)'
+          write(*,*) 'spectra-x time series length+1=',spectbszx
+          open (unit=997, file = 'specdata/ke2x.dat', form = 'formatted',access = 'sequential')
+          write(997,specform) 0.0,kx1d
+          close(997)
+
+          WRITE(spectbszy,'(I3)') size(key1_spec)+1
+          specform='('//trim(spectbszy)//'e13.5)'
+          write(*,*) 'spectra-y time series length+1=',spectbszy
+          open (unit=996, file = 'specdata/ke2y.dat', form = 'formatted',access = 'sequential')
+          write(996,specform) 0.0,ky1d
+          close(996)
+
+          WRITE(spectbszx,'(I3)') size(kex1_spec)+1
+          specform='('//trim(spectbszx)//'e13.5)'
+          write(*,*) 'spectra-x time series length+1=',spectbszx
+          open (unit=995, file = 'specdata/ke_ekx.dat', form = 'formatted',access = 'sequential')
+          write(995,specform) 0.0,kx1d
+          close(995)
+
+          WRITE(spectbszy,'(I3)') size(key1_spec)+1
+          specform='('//trim(spectbszy)//'e13.5)'
+          write(*,*) 'spectra-y time series length+1=',spectbszy
+          open (unit=994, file = 'specdata/ke_eky.dat', form = 'formatted',access = 'sequential')
+          write(994,specform) 0.0,ky1d
+          close(994)
+
+          
+         !  open (998, file = 'ke1y.dat', status = 'unknown', access = 'append')
+         !  write(998,*) 'ky',nky1d
+         !  open (997, file = 'ke2x.dat', status = 'unknown', access = 'append')
+         !  write(997,*) 'kx',nkx1d
+         !  open (996, file = 'ke2y.dat', status = 'unknown', access = 'append')
+         !  write(996,*) 'ky',nky1d
+         !  open (995, file = 'keex.dat', status = 'unknown', access = 'append')
+         !  write(995,*) 'kx',nkx1d
+         !  open (994, file = 'keey.dat', status = 'unknown', access = 'append')
+         !  write(994,*) 'ky',nky1d
 !==============================================================      
 !
 !      subsequent time steps
@@ -190,11 +258,27 @@
 
        do its = 2, nsteps
 
+         ! determine local time step !tstime
+         itlocal=mod(its,itape)
+         itsrow=int(itlocal/ispechst)
+         if (itsrow==0.and.its.gt.ispechst)then
+         itsrow=ntsrow
+         end if
+         if(itlocal==0) then
+            itlocal = itape
+            nspecfile=nspecfile+1
+         end if
+         if(mod(itlocal,ispechst)==0) then
+            tstime(itsrow)=time/86400. !time to print
+            ! write(*,*) 'its,itsrow,time[day]',its,itsrow,tstime(itsrow)
+         end if
+!        =================
           if ( mod(its,iout*10).eq.1 ) write(*,*) its, iout
-
+!        =================
           if ( use_ramp .eqv. .true. ) then
              ramp =  min(1.,float(its)*ramp0)
           endif
+!        =================
 
           uu(:,:) = Uek(:,:,2)
           vv(:,:) = Vek(:,:,2)
@@ -304,12 +388,132 @@
           endif  !output
 
           if ( time.gt.0*86400. ) then
-             if ( mod(its,20).eq.0 ) then
+             if ( mod(its,ispechst).eq.0 ) then
                 count_specs_1 = count_specs_1 + 1
                 count_specs_2 = count_specs_2 + 1 
                 count_specs_ek = count_specs_ek + 1
                 count_specs_to = count_specs_to + 1
                 count_specs_ag = count_specs_ag + 1
+         
+                ! 1-Dx
+                if(mod(itlocal,ispechst)==0) then
+                kex1_spec=0.0
+                kex2_spec=0.0
+                do j = 1,ny
+                  ! u, v at iz=1
+                datrx(:)=u(1:nx,j,1,2)
+                include 'fftw_stuff/specx.f90'
+                kex1_spec =  spectrumx
+                datrx(:)=v(1:nx,j,1,2)
+                include 'fftw_stuff/specx.f90'
+                kex1_spec =  kex1_spec + spectrumx
+                kex1_spec_tb(:,itsrow)=kex1_spec
+                !u,v at iz=2
+                datrx(:)=u(1:nx,j,2,2)
+                include 'fftw_stuff/specx.f90'
+                kex2_spec =  kex2_spec + spectrumx
+                datrx(:)=v(1:nx,j,2,2)
+                include 'fftw_stuff/specx.f90'
+                kex2_spec =  kex2_spec + spectrumx
+                kex2_spec_tb(:,itsrow)=kex2_spec
+                !Uek 
+                datrx(:) = Uek(1:nx,j,2)       
+                include 'fftw_stuff/specx.f90'
+                kex_ek_spec =  kex_ek_spec + spectrumx
+         
+                datrx(:) = Vek(1:nx,j,2)       
+                include 'fftw_stuff/specx.f90'
+                kex_ek_spec =  kex_ek_spec + spectrumx
+                kex_ek_spec_tb(:,itsrow)=kex_ek_spec
+                enddo
+               
+               !  ! 1-Dy
+                key1_spec=0.0
+                key2_spec=0.0
+                do i = 1,nx
+                  ! u, v at iz=1
+                datry(:)=u(i,1:ny,1,2)
+                include 'fftw_stuff/specy.f90'
+                key1_spec =  key1_spec + spectrumy
+                datry(:)=v(i,1:ny,1,2)
+                include 'fftw_stuff/specy.f90'
+                key1_spec =  key1_spec + spectrumy
+                key1_spec_tb(:,itsrow)=key1_spec
+                !u,v at iz=2
+                datry(:)=u(i,1:ny,2,2)
+                include 'fftw_stuff/specy.f90'
+                key2_spec =  key2_spec + spectrumy
+                datry(:)=v(i,1:ny,2,2)
+                include 'fftw_stuff/specy.f90'
+                key2_spec =  key2_spec + spectrumy
+                key2_spec_tb(:,itsrow)=key2_spec
+                !Uek,Vek
+                datry(:) = Uek(i,1:ny,2)  
+                include 'fftw_stuff/specy.f90'
+                key_ek_spec =  key_ek_spec + spectrumy
+                datry(:) = Vek(i,1:ny,2)  
+                include 'fftw_stuff/specy.f90'
+                key_ek_spec =  key_ek_spec + spectrumy
+                key_ek_spec_tb(:,itsrow)=key_ek_spec
+               enddo
+
+               ! Write 1-D spectra
+               WRITE(which2,'(I5)') 10000 + nspecfile
+               if(itsrow==ntsrow) then
+                  write(*,*) 'its,itlocal,itsrow,nspecfile',its,itlocal,itsrow,nspecfile
+                  pathspects='specdata/ke1x_'//trim(which2)//'.dat'
+                  open (unit=999, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(999,specform) tstime(i),kex1_spec_tb(:,i)/nx/ny
+                     end do
+                  close (999)
+                  
+                  pathspects='specdata/ke1y_'//trim(which2)//'.dat'
+                  open (unit=998, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(998,specform) tstime(i),key1_spec_tb(:,i)/nx/ny
+                     end do
+                  close (998)
+                  
+                  pathspects='specdata/ke2x_'//trim(which2)//'.dat'
+                  open (unit=997, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(997,specform) tstime(i),kex2_spec_tb(:,i)/nx/ny
+                     end do
+                  close (997)
+                  
+                  pathspects='specdata/ke2y_'//trim(which2)//'.dat'
+                  open (unit=996, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(996,specform) tstime(i),key2_spec_tb(:,i)/nx/ny
+                     end do
+                  close (996)
+
+                  pathspects='specdata/ke_ekx_'//trim(which2)//'.dat'
+                  open (unit=995, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(995,specform) tstime(i),kex_ek_spec_tb(:,i)/nx/ny
+                     end do
+                  close (995)
+                  
+                  pathspects='specdata/ke_eky_'//trim(which2)//'.dat'
+                  open (unit=994, file = pathspects, form = 'formatted', access = 'sequential')
+                     do i=1,ntsrow
+                        write(994,specform) tstime(i),key_ek_spec_tb(:,i)/nx/ny
+                     end do
+                  close (994)
+               
+               end if !itsrow==ntsrow
+               end if !every ispechst
+
+               !  write(998,*) time/86400.,key1_spec
+               !  write(997,*) time/86400.,kex2_spec
+               !  write(996,*) time/86400.,key2_spec
+               !  write(995,*) time/86400.,kex_ek_spec
+               !  write(994,*) time/86400.,key_ek_spec
+         
+         
+                         ! 2D
                 datr(:,:) = u(1:nx,1:ny,1,2)       
                 include 'fftw_stuff/spec1.f90'
                 ke1_spec =  ke1_spec + spectrum
@@ -344,6 +548,12 @@
              endif
           endif
 
+          if ( time.gt.0*86400. ) then
+            if ( mod(its,ispechst).eq.0 ) then
+            endif
+         endif
+
+
 !          if ( mod(its,i_diags).eq.0 ) then
 !             include 'subs/diags.f90'
 !          endif
@@ -367,6 +577,9 @@
           write(97,*) i, ke2_spec(i)/nx/nx/ny/ny/count_specs_2
        enddo
        close(97)
+
+
+
 
  !      open(96, file = 'for_to_spec')
  !      do i = 1,ny
