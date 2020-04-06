@@ -31,20 +31,24 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.)   
+  parameter ( hek = 50.e8)   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( totaltime = 86400 * 100. )
+  parameter ( ndays= 200., totaltime = 86400 * ndays )
 
-  parameter ( nsteps = totaltime/dt )
+  parameter ( nsteps = totaltime/dt,fileperday=16 )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/1000/16 , i_diags = ifix(86400./16/dt) )
+  parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
+ 
+  parameter (itape=86400*10/dt,ispechst=12) !spectrum output file, output one spectra per ispechst
 
-  parameter ( start_movie = 1. , subsmpstep=4 )
+  parameter(save2dfft=.true.,calc1Dspec=.false. )
+
+  parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
 
   parameter ( ifsteady = .true. )
 
