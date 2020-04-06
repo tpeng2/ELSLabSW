@@ -28,17 +28,9 @@
 !  string19 = 'data/div_ek'  // '_' // which(1:5)
 
 
-  !  do j = 1,ny,subsmpstep
-  !  jj = 1 + (j-1)/subsmpstep
-  !  do i = 1,nx,subsmpstep
-  !     ii = 1 + (i-1)/subsmpstep
-  !     div_ek_out(ii,jj) = div_ek(i,j)
-  !  enddo
-  !  enddo
-
 ! Note indices for (u,v,eta ...) starting with 0, useful part is 1:256
-  !  real u_out(0:nx/subsmpstep+1,0:ny/subsmpstep+1,nz), v_out(0:nx/subsmpstep+1,0:ny/subsmpstep+1,nz)
-  !  real div_ek_out(0:nx/subsmpstep+1,0:ny/subsmpstep+1), eta_out(0:nx/subsmpstep+1,0:ny/subsmpstep+1,nz)
+  !  real u_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz), v_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
+  !  real div_ek_out(0:nx/subsmprto+1,0:ny/subsmprto+1), eta_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
  
    div_ek_out=div_ek(isubx,isuby)
 
@@ -46,46 +38,27 @@
    u_out(:,:,k)=u(isubx,isuby,k,3)
    v_out(:,:,k)=v(isubx,isuby,k,3)
    eta_out(:,:,k)=eta(isubx,isuby,k,3)
-  !  do j = 1,ny,subsmpstep
-!    jj = 1 + (j-1)/subsmpstep
-!    do i = 1,nx,subsmpstep
-!       ii = 1 + (i-1)/subsmpstep
-!       ! u_out(ii,jj,k) = u(i,j,k,3)
-!       ! v_out(ii,jj,k) = v(i,j,k,3)
-!       ! eta_out(ii,jj,k) = eta(i,j,k,3)
-! !     Uek_out(ii,jj) = Uek(i,j,2)
-! !     Vek_out(ii,jj) = Vek(i,j,2)
-!    enddo
-  !  enddo
    enddo
+
    open(unit=14,file=string1,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isubx)*nz))
-!       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-   write(14,REC=1) (((u_out(i,j,k),i=1,nnx/subsmpstep),j=1,nny/subsmpstep),k=1,nz)
-  ! Format ((fzavg(i,j), i=1,nx2dval), j=1,ny2dval)
+   write(14,REC=1) (((u_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
 
-!   write(14,REC=1) u_out(:,:,:) !!!Extra byte will write to store the type of byte length!!! Tianze 3/23/20
    close(14)
   
    open(unit=15,file=string2,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-!       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-        write(15,REC=1) (((v_out(i,j,k),i=1,nnx/subsmpstep),j=1,nny/subsmpstep),k=1,nz)
-!   write(15,REC=1) v_out(:,:,:)
+        write(15,REC=1) (((v_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
    close(15)
   
   open(unit=16,file=string3,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-!      & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-        write(16,REC=1) (((eta_out(i,j,k),i=1,nnx/subsmpstep),j=1,nny/subsmpstep),k=1,nz)
-!  write(16,REC=1) eta_out(:,:,:)
+        write(16,REC=1) (((eta_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
   close(16)
   
   open(unit=17,file=string4,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)))
-!      & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-        write(17,REC=1) ((div_ek_out(i,j),i=1,nnx/subsmpstep),j=1,nny/subsmpstep)
-!  write(17,REC=1) div_ek_out(:,:)
+        write(17,REC=1) ((div_ek_out(i,j),i=1,nnx/subsmprto),j=1,nny/subsmprto)
   close(17)
   
 !  open(unit=18,file=string5,access='DIRECT',&

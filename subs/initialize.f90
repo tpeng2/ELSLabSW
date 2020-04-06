@@ -75,8 +75,9 @@
        if ( restart .eqv. .false. ) then
          icount = 0 !for  output file index
          time = 0.  !in second
+         iftcount =0
          restart_from=time
-          print*, 'Restart from', restart_from, 'day'
+         print*,'Restart from',restart_from, 'day','icount,iftcount',icount,iftcount
 
           ! add seed IC
           tmp(1) = Lx/8.
@@ -104,7 +105,7 @@
                  &      eta(i,j,2,1)
           enddo
           enddo
-          read(0,*) icount,time
+          read(0,*) icount,time,nspecfile,iftcount
           close(0)
          restart_from=time/86400
          print*, 'Restart from', restart_from, 'day'
