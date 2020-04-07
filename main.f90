@@ -76,11 +76,12 @@
       double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
       double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
 
-      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes
+      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
       !subsampling arrays
-      integer,allocatable:: isubx(:),isuby(:),iftsubx(:),iftsuby(:)
+      integer,allocatable:: isubx(:),isuby(:),iftsubkl(:,:)
+      integer rdsubk,rdsubl !temporary variables for reading (k,l) pair 
       !subsampling size
-      integer szsubx,szsuby,szftsubx,szftsuby
+      integer szsubx,szsuby,szftrdrow,szftrdcol
       !I/O info
       integer icount,iftcount, count_specs_1, count_specs_2, count_specs_ek
       integer count_specs_to, count_specs_ag
@@ -97,15 +98,13 @@
       ! === Allocate variables
       szsubx=ceiling(nx/(subsmprto+1e-15))
       szsuby=ceiling(ny/(subsmprto+1e-15))
-      szftsubx=ceiling((nx/2+1)/(ftsubsmprto+1e-15))
-      szftsuby=ceiling(ny/(ftsubsmprto+1e-15))
-      allocate(isubx(szsubx),isuby(szsuby),iftsubx(szftsubx),iftsuby(szftsuby))
+      ! szftrdrow=ceiling((nx/2+1)/(ftsubsmprto+1e-15))
+      ! szftrdcol=ceiling(ny/(ftsubsmprto+1e-15))
       ! === Define subsampling range in spatial space
       isubx=(/(i, i=1,nx, subsmprto)/)
       isuby=(/(i, i=1,ny, subsmprto)/)
-      ! === Define subsampling range in Fourier space
-      iftsubx=(/(i, i=1,nx/2+1, ftsubsmprto)/)
-      iftsuby=(/(i, i=1,ny, ftsubsmprto)/)
+      ! === FFT subsmpling, fed with (k,l) pair
+      include 'subs/read_kxky_subsmp.f90'
 
       ! === 
       !set icount and time based on if restart is true or false !moved to initialize
