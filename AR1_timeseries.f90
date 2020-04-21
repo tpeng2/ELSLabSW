@@ -17,7 +17,7 @@
        amp = 1.
        print*, delta_omega*n_omega/f
 
-       do i = 1, n_omega
+       do i = 1, n_omega !10*idays
           omega(i) = i*delta_omega
           phase(i) = 2.*pi*rand()
 !         if(omega(i).le.0.1*f) then

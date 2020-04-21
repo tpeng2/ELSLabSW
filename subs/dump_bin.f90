@@ -1,31 +1,31 @@
 
   eta(:,:,1,3) = Psurf(:,:)
   
-  WRITE(which,'(I5)') 10000 + icount
+  WRITE(which,'(I6)') 100000 + icount
   
-   string1 = 'data/u_o'  // '_' // which(1:5)
-   string2 = 'data/v_o'  // '_' // which(1:5)
-   string3 = 'data/eta_o'  // '_' // which(1:5)
-   string4 = 'data/div_o'  // '_' // which(1:5)
-!  string5 = 'data/Uek'  // '_' // which(1:5)
-!  string6 = 'data/Vek'  // '_' // which(1:5)
+   string1 = 'data/u_o'  // '_' // trim(which)
+   string2 = 'data/v_o'  // '_' // trim(which)
+   string3 = 'data/eta_o'  // '_' // trim(which)
+   string4 = 'data/div_o'  // '_' // trim(which)
+!  string5 = 'data/Uek'  // '_' // trim(which)
+!  string6 = 'data/Vek'  // '_' // trim(which)
 
 
-!  string5 = 'data/Vek'  // '_' // which(1:5)
-!  string6 = 'data/forci_qg'  // '_' // which(1:5)
-!  string7 = 'data/forci_ag'  // '_' // which(1:5)
-!  string8 = 'data/forci_to'  // '_' // which(1:5)
-!  string9 = 'data/dissi_u'  // '_' // which(1:5)
-!  string10 = 'data/dissi_v'  // '_' // which(1:5)
-!  string11 = 'data/q'  // '_' // which(1:5)
-!  string12 = 'data/taux'  // '_' // which(1:5)
-!  string13 = 'data/u_qg'  // '_' // which(1:5)
-!  string14 = 'data/u_ag'  // '_' // which(1:5)
-!  string15 = 'data/v_qg'  // '_' // which(1:5)
-!  string16 = 'data/v_ag'  // '_' // which(1:5)
-!  string17 = 'data/eta_qg'  // '_' // which(1:5)
-!  string18 = 'data/eta_ag'  // '_' // which(1:5)
-!  string19 = 'data/div_ek'  // '_' // which(1:5)
+!  string5 = 'data/Vek'  // '_' // trim(which)
+!  string6 = 'data/forci_qg'  // '_' // trim(which)
+!  string7 = 'data/forci_ag'  // '_' // trim(which)
+!  string8 = 'data/forci_to'  // '_' // trim(which)
+!  string9 = 'data/dissi_u'  // '_' // trim(which)
+!  string10 = 'data/dissi_v'  // '_' // trim(which)
+!  string11 = 'data/q'  // '_' // trim(which)
+!  string12 = 'data/taux'  // '_' // trim(which)
+!  string13 = 'data/u_qg'  // '_' // trim(which)
+!  string14 = 'data/u_ag'  // '_' // trim(which)
+!  string15 = 'data/v_qg'  // '_' // trim(which)
+!  string16 = 'data/v_ag'  // '_' // trim(which)
+!  string17 = 'data/eta_qg'  // '_' // trim(which)
+!  string18 = 'data/eta_ag'  // '_' // trim(which)
+!  string19 = 'data/div_ek'  // '_' // trim(which)
 
 
 ! Note indices for (u,v,eta ...) starting with 0, useful part is 1:256

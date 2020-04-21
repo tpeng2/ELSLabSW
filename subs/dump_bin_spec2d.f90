@@ -1,13 +1,12 @@
-
-        WRITE(which3,'(I5)') 10000 + iftcount
-        string1 = 'specdata/ufft2d_r'  // '_' // which3(1:5)
-        string1i = 'specdata/ufft2d_i'  // '_' // which3(1:5)
-        string2 = 'specdata/vfft2d_r'  // '_' // which3(1:5)
-        string2i = 'specdata/vfft2d_i'  // '_' // which3(1:5)
-        string3 = 'specdata/ftotalfft_r'  // '_' // which3(1:5)
-        string3i = 'specdata/ftotalfft_i'  // '_' // which3(1:5)
-        string4 = 'specdata/fagfft_r'  // '_' // which3(1:5)
-        string4i = 'specdata/fagfft_i'  // '_' // which3(1:5)
+        WRITE(which3,'(I6)') 100000 + iftcount
+        string1 = 'specdata/ufft2d_r'  // '_' // trim(which3)
+        string1i = 'specdata/ufft2d_i'  // '_' // trim(which3)
+        string2 = 'specdata/vfft2d_r'  // '_' // trim(which3)
+        string2i = 'specdata/vfft2d_i'  // '_' // trim(which3)
+        string3 = 'specdata/ftotalfft_r'  // '_' // trim(which3)
+        string3i = 'specdata/ftotalfft_i'  // '_' // trim(which3)
+        string4 = 'specdata/fagfft_r'  // '_' // trim(which3)
+        string4i = 'specdata/fagfft_i'  // '_' // trim(which3)
         !ufft,vfft,ftotalfft,fagfft
 
         open(unit=9999,file=string1,access='DIRECT',&

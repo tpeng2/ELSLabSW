@@ -8,17 +8,20 @@
       real ndays,totaltime,dt
       real restart_from
       integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
-      integer ftsubsmprto
+      integer ftsubsmprto,forcingtype
       logical restart, use_ramp, ifsteady
       logical calc1Dspec,save_movie,save2dfft
       include 'parameters.f90'
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
+      !random number
+      integer iseed,values(8)
       end module data_initial
 
       program main
 
       use data_initial
-
+      ! random number
+      real ran2
       real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
       real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
       real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
@@ -212,7 +215,8 @@
          enddo
 
          include 'subs/IOheader.f90' 
-         
+         call date_and_time(VALUES=values)
+         iseed = -(values(8)+values(7)+values(6))
       !==============================================================      
       !
       !      subsequent time steps
@@ -468,7 +472,7 @@
                ke_ek_spec =  ke_ek_spec + spectrum
 
                iftcount=iftcount+1
-               write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
+               ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
                
                ! Write 2-D FFT fields
                if(save2dfft) then
@@ -551,3 +555,40 @@
       close(0)
 
       end program main
+
+function ran2(idum)
+   use data_initial
+   integer :: idum,IM1,IM2,IMM1,IA1,IA2,IQ1,IQ2,IR1,IR2,NTAB,NDIV
+   real :: ran2,AM,EPS,RNMX
+   PARAMETER (IM1=2147483563,IM2=2147483399,AM=1./IM1,IMM1=IM1-1,&
+        IA1=40014,IA2=40692,IQ1=53668,IQ2=52774,IR1=12211,&
+        IR2=3791,NTAB=32,NDIV=1+IMM1/NTAB,EPS=1.2e-7,RNMX=1.-EPS)
+   INTEGER :: idum2,j,k,iv(NTAB),iy
+   SAVE iv,iy,idum2
+   DATA idum2/123456789/,iv/NTAB*0/,iy/0/
+
+   if (idum .le. 0) then
+         idum=max(-idum,1)
+         idum2 = idum
+         do j = NTAB+8,1,-1
+            k=idum/IQ1
+            idum=IA1*(idum-k*IQ1)-k*IR1
+            if (idum .lt. 0) idum=idum+IM1
+            if (j .le. NTAB) iv(j) = idum
+         end do
+         iy=iv(1)
+   end if
+   k=idum/IQ1
+   idum=IA1*(idum-k*IQ1)-k*IR1
+   if (idum .lt. 0) idum=idum+IM1
+   k=idum2/IQ2
+   idum2=IA2*(idum2-k*IQ2)-k*IR2
+   if (idum2 .lt. 0) idum2=idum2+IM2
+   j = 1+iy/NDIV
+   iy = iv(j) - idum2
+   iv(j) = idum
+   if (iy .lt. 1) iy = iy+IMM1
+   ran2=min(AM*iy,RNMX)
+   return
+end function ran2
+
