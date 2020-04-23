@@ -37,7 +37,7 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1500., totaltime = 86400 * ndays )
+  parameter ( ndays= 50., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 
