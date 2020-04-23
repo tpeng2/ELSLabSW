@@ -71,11 +71,11 @@
        taux_var = array
 
 !   --- Restart
+       icount = 0 !for  output file index
+       iftcount =0
 
        if ( restart .eqv. .false. ) then
-         icount = 0 !for  output file index
          time = 0.  !in second
-         iftcount =0
          restart_from=time
          print*,'Restart from',restart_from, 'day','icount,iftcount',icount,iftcount
 
@@ -105,7 +105,7 @@
                  &      eta(i,j,2,1)
           enddo
           enddo
-          read(0,*) icount,time,nspecfile,iftcount
+          read(0,*) icount_srt,time,nspecfile,iftcount_srt
           close(0)
          restart_from=time/86400
          print*, 'Restart from', restart_from, 'day'

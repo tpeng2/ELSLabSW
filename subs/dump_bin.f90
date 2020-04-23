@@ -42,23 +42,23 @@
 
    open(unit=14,file=string1,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isubx)*nz))
-   write(14,REC=1) (((u_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
+   write(14,REC=1) (((u_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
 
    close(14)
   
    open(unit=15,file=string2,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-        write(15,REC=1) (((v_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
+        write(15,REC=1) (((v_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
    close(15)
   
   open(unit=16,file=string3,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-        write(16,REC=1) (((eta_out(i,j,k),i=1,nnx/subsmprto),j=1,nny/subsmprto),k=1,nz)
+        write(16,REC=1) (((eta_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
   close(16)
   
   open(unit=17,file=string4,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)))
-        write(17,REC=1) ((div_ek_out(i,j),i=1,nnx/subsmprto),j=1,nny/subsmprto)
+        write(17,REC=1) ((div_ek_out(i,j),i=1,nx/subsmprto),j=1,ny/subsmprto)
   close(17)
   
 !  open(unit=18,file=string5,access='DIRECT',&

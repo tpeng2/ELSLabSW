@@ -15,13 +15,16 @@
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
       !random number
       integer iseed,values(8)
+      !forcing subroutine
+      real delta_omega,f_thrhld
+      integer n_omega,Fws
+      real,allocatable :: omega(:),A_n(:),phi(:)
       end module data_initial
 
       program main
 
       use data_initial
       ! random number
-      real ran2
       real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
       real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
       real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
@@ -62,11 +65,12 @@
       real gprime(nz), Htot, H(nz)
       real top(nz), bot(nz), Fmode(nz)
       real pdf(-100:100)
-      real x, y, z, ramp, ramp0, time
+      real x, y, z, ramp, ramp0, time, today
       real Lrossby
-      real amp_matrix(864000)
+      real amp_matrix(864000) !3000 days
       real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
       real*4 tmp_out(10)
+
       !2-D FFT spectra
       real*4 ke1_spec(0:nx), ke2_spec(0:nx), ke_ek_spec(0:nx)
       real*4 for_to_spec(0:nx), for_ag_spec(0:nx)
@@ -87,6 +91,7 @@
       integer szsubx,szsuby,szftrdrow,szftrdcol
       !I/O info
       integer icount,iftcount, count_specs_1, count_specs_2, count_specs_ek
+      integer icount_srt,iftcount_srt
       integer count_specs_to, count_specs_ag
 
       character(88) scrap, which,which2,which3, spectbszx,spectbszy,specform, pathspects
@@ -127,10 +132,13 @@
          amp_matrix(:) = 0.
       elseif ( ifsteady .eqv. .false. ) then
          open(99, file = 'amp_matrix')
+         write(*,*) 'amp_matrix file is opened'
          do it = 1,864000
             read(99,*) amp_matrix(it)
+            if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
          enddo
          amp_matrix(:) = 2.0*amp_matrix(:)
+         write(*,*) 'amp_matrix file is read'
       endif
 
       !! --- Initialization !!
@@ -140,6 +148,25 @@
       if(restart==.false.)   nspecfile=0
       write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
       !forcing
+      Fws=20 !sampling extension (beyond f0)
+      f_thrhld=0.2*f0
+      n_omega=Fws*ndays !20 per day to construct the curve
+      allocate(omega(n_omega),A_n(n_omega),phi(n_omgea))
+      delta_omega=2*pi/86400./ndays
+      ! !construct Amp frequency curve
+      ! do i = 1, n_omega !1e*5
+      !    omega(i) = i*delta_omega
+      !    phi(i)= ran2(seed)*2.0*pi
+      !    if(omega(i).le.f_thrhld) then
+      !          A_n(i) = amp
+      !    else
+      !          A_n(i) = amp*(f_thrhld/omega(i))
+      !    endif
+      !    ! write(21,*) omega(i)/f,A_n(i)**2
+      !    ! flush(21)
+      ! enddo
+      ! write(*,*) 'Amp frequency chart is constructed'
+      !apply amp_matrix
       taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
       !==============================================================
@@ -242,7 +269,11 @@
          end if
 
          !        =================
-         if ( mod(its,iout*10).eq.1 ) write(*,*) 'current time step, iout', its, iout
+         if ( mod(its,iout*10).eq.1 ) then
+         write(*,*) 'current time step, iout', its, iout
+         !shuffle forcing terms
+         ! call shuffle_phi
+         end if
          !        =================
          if ( use_ramp .eqv. .true. ) then
             ramp =  min(1.,float(its)*ramp0)
@@ -286,6 +317,7 @@
          Uek(:,:,3) = Uek(:,:,1) + 2*dt * rhs_Uek(:,:)
          Vek(:,:,3) = Vek(:,:,1) + 2*dt * rhs_Vek(:,:)
          time = its*dt
+         today=time/86400
          taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its+1))
 
          !
@@ -335,7 +367,7 @@
          enddo
          enddo
 
-         write(300,*), time/86400., ke1/nx/ny, ke2/nx/ny
+         write(300,*),its, time/86400., ke1/nx/ny, ke2/nx/ny
          call flush(300)
 
          if(nsteps.lt.start_movie.and.save_movie) then
@@ -551,7 +583,7 @@
             &      eta(i,j,2,3)
       enddo
       enddo
-      write(0,*) icount,time,nspecfile,iftcount
+      write(0,*) icount+icount_srt,time,nspecfile,iftcount+iftcount_srt
       close(0)
 
       end program main
@@ -561,34 +593,124 @@ function ran2(idum)
    integer :: idum,IM1,IM2,IMM1,IA1,IA2,IQ1,IQ2,IR1,IR2,NTAB,NDIV
    real :: ran2,AM,EPS,RNMX
    PARAMETER (IM1=2147483563,IM2=2147483399,AM=1./IM1,IMM1=IM1-1,&
-        IA1=40014,IA2=40692,IQ1=53668,IQ2=52774,IR1=12211,&
-        IR2=3791,NTAB=32,NDIV=1+IMM1/NTAB,EPS=1.2e-7,RNMX=1.-EPS)
-   INTEGER :: idum2,j,k,iv(NTAB),iy
+         IA1=40014,IA2=40692,IQ1=53668,IQ2=52774,IR1=12211,&
+         IR2=3791,NTAB=32,NDIV=1+IMM1/NTAB,EPS=1.2e-7,RNMX=1.-EPS)
+   INTEGER :: idum2,j1,k1,iv(NTAB),iy
    SAVE iv,iy,idum2
    DATA idum2/123456789/,iv/NTAB*0/,iy/0/
 
    if (idum .le. 0) then
          idum=max(-idum,1)
          idum2 = idum
-         do j = NTAB+8,1,-1
-            k=idum/IQ1
-            idum=IA1*(idum-k*IQ1)-k*IR1
+         do j1 = NTAB+8,1,-1
+            k1=idum/IQ1
+            idum=IA1*(idum-k1*IQ1)-k1*IR1
             if (idum .lt. 0) idum=idum+IM1
-            if (j .le. NTAB) iv(j) = idum
+            if (j1 .le. NTAB) iv(j1) = idum
          end do
          iy=iv(1)
    end if
-   k=idum/IQ1
-   idum=IA1*(idum-k*IQ1)-k*IR1
+   k1=idum/IQ1
+   idum=IA1*(idum-k1*IQ1)-k1*IR1
    if (idum .lt. 0) idum=idum+IM1
-   k=idum2/IQ2
-   idum2=IA2*(idum2-k*IQ2)-k*IR2
+   k1=idum2/IQ2
+   idum2=IA2*(idum2-k1*IQ2)-k1*IR2
    if (idum2 .lt. 0) idum2=idum2+IM2
-   j = 1+iy/NDIV
-   iy = iv(j) - idum2
-   iv(j) = idum
+   j1 = 1+iy/NDIV
+   iy = iv(j1) - idum2
+   iv(j1) = idum
    if (iy .lt. 1) iy = iy+IMM1
    ran2=min(AM*iy,RNMX)
    return
 end function ran2
 
+function ran1(idum)
+   !
+   ! ----------- stolen from numerical recipes,p. 271
+   !
+   integer idum, ia, im, iq, ir, ntab, ndiv
+   real ran1, am, eps, rnmx
+   parameter (ia=16807,im=2147483647,am=1.0/im,iq=127773,ir=2836.0,&
+               ntab=32,ndiv=1+(im-1)/ntab,eps=1.2e-07,rnmx=1.0-eps)
+   integer j1, k1, iv(ntab), iy
+   save iv, iy
+   data iv /ntab*0/, iy /0/
+   if(idum .le. 0 .or. iy .eq. 0) then
+      idum = max(-idum,1)
+      do j1=ntab+8,1,-1
+         k1 = idum/iq
+         idum = ia*(idum - k1*iq) - ir*k1
+         if(idum .lt. 0) idum = idum + im
+         if(j1 .le. ntab) iv(j1) = idum
+      enddo
+      iy = iv(1)
+   endif
+   k1     = idum/iq
+   idum  = ia*(idum - k1*iq) - ir*k1
+   if(idum .lt. 0) idum = idum + im
+   j1     = 1 + iy/ndiv
+   iy    = iv(j1)
+   iv(j1) = idum
+   ran1  = min(am*iy, rnmx)
+   !
+   return
+end function ran1
+
+
+subroutine get_tau_amp_AR(time1,amp1)
+   use data_initial
+   real,intent(in) :: time1
+   real,intent(out) :: amp1
+   real amp_forcing,ran2
+   allocate(phi(n_omega))
+   amp1=0.0
+   amp1=sum(A_n*sin(omega*time1 + phi))
+end subroutine
+
+subroutine shuffle_phi
+   use data_initial
+   real ran2
+   integer iw
+   do iw = 1, n_omega !1e*5
+      phi(iw)= ran2(iseed)*2.0*pi
+   end do
+   write(*,*) 'phi for stochastic forcing is shuffled from 1 to',n_omega
+end subroutine 
+
+subroutine Euler_Maruyama(amp1,amp2)
+   use data_initial
+   real ran2,volsqrdt
+   integer i,j
+   ! set dt to be unity - could add as input...
+   ! set in data_initial's parameters.f90
+   
+   ! pre set vol*sqrt(dt) vol to reduce run time
+   volsqrdt = vol*sqrt(dt);
+   amp2 = amp1 + theta*(mu - s0)*dt + ran2(iseed)*volsqrdt;
+end subroutine
+
+FUNCTION gasdev(idum) 
+   INTEGER idum
+   REAL gasdev
+   !Returns a normally distributed deviate with zero mean and unit variance, using ran1(idum)
+   !as the source of uniform deviates.
+   INTEGER iset
+   REAL fac,gset,rsq,v1,v2,ran1 
+   SAVE iset,gset
+   DATA iset/0/
+   if (idum.lt.0) iset=0
+   if (iset.eq.0) then
+1     v1=2.*ran1(idum)-1. 
+      v2=2.*ran1(idum)-1.
+      rsq=v1**2+v2**2 
+      if(rsq.ge.1..or.rsq.eq.0.) goto 1 
+      fac=sqrt(-2.*log(rsq)/rsq) 
+      gset=v1*fac
+      gasdev=v2*fac
+      iset=1
+   else 
+      gasdev=gset
+      iset=0 
+   endif
+   return 
+   END FUNCTION gasdev
