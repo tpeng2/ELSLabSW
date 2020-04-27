@@ -52,10 +52,11 @@
        do it = 1, n_length
           time = (it-1)*dt
           amp_forcing = 0.
-          do i = 1, n_omega
-             phi = omega(i)*time + phase(i)
-             amp_forcing = amp_forcing + A_n(i)*sin(phi)
-          enddo
+       !    do i = 1, n_omega
+       !       phi = omega(i)*time + phase(i)
+       !       amp_forcing = amp_forcing + A_n(i)*sin(phi)
+       !    enddo
+          amp_forcing=sum(A_n*sin(omega*time+phase))
           amp_matrix(it)=amp_forcing
           write(20,*) time/86400, amp_forcing
           rms_amp = rms_amp + amp_forcing**2
@@ -69,7 +70,7 @@
        print*, 'factor' , factor
 !      factor = 1.02309827E-02
 !      open(99, file = 'amp_matrix_truncated')
-       open(99, file = 'amp_matrix')
+       open(99, file = 'amp_matrix_testsum')
        do it = 1, n_length 
        write(99,*) amp_matrix(it)*factor
        enddo

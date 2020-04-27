@@ -1,5 +1,5 @@
 module data_initial
-   integer nx, ny, nz, nnx, nny
+   integer nx, ny, nz, nnx, nny, ilevel
    integer i_diags
    double precision pi, twopi, Lx, Ly, dx, dy
    real f0, beta, r_drag, Ah, r_invLap, rf
@@ -11,19 +11,22 @@ module data_initial
    integer ftsubsmprto,forcingtype
    logical restart, use_ramp, ifsteady
    logical calc1Dspec,save_movie,save2dfft
+   real c_theta,c_mu,c_sigma ! ---   O-U process (Euler method)
+   integer iou_method
    include 'parameters.f90'
    parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
    !random number
    integer iseed,values(8)
    !forcing subroutine
-   real delta_omega,f_thrhld
-   integer n_omega,Fws
+   real delta_omega,f_thrhld, amp, amp_forcing,rms_amp,ampfactor
+   integer n_omega,Fws,Omgrange,itt
    real,allocatable :: omega(:),A_n(:),phi(:)
 end module data_initial
 
 program main
 
    use data_initial
+   implicit none
    ! random number
    real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
    real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
@@ -67,7 +70,8 @@ program main
    real pdf(-100:100)
    real x, y, z, ramp, ramp0, time, today
    real Lrossby
-   real amp_matrix(864000) !3000 days
+   real amp_matrix(nsteps+1),amp_save,amp_load !nsteps+1 days
+   real,allocatable:: amp_matrix_rand(:)
    real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
    real*4 tmp_out(10)
 
@@ -100,9 +104,15 @@ program main
    character(88) string6, string7, string8, string9, string10
    character(88) string11, string12, string13, string14, string15
    character(88) string16, string17, string18, string19, string20
+   ! random number
+   real ran1,ran2,ranf,gasdev
 
    include 'fftw_stuff/fft_params.f90'
    include 'fftw_stuff/fft_init.f90'
+   ! Set random number seeds
+   call date_and_time(VALUES=values)
+   iseed = -(values(8)+values(7)+values(6))
+   
    ! === Allocate variables
    szsubx=ceiling(nx/(subsmprto+1e-15))
    szsuby=ceiling(ny/(subsmprto+1e-15))
@@ -128,18 +138,7 @@ program main
    write(*,*) 'Spectrum time series has', ntsrow, 'lines'
    write(*,*) 'dx = ', dx
 
-   if ( ifsteady .eqv. .true. ) then
-      amp_matrix(:) = 0.
-   elseif ( ifsteady .eqv. .false. ) then
-      open(99, file = 'amp_matrix')
-      write(*,*) 'amp_matrix file is opened'
-      do it = 1,864000
-         read(99,*) amp_matrix(it)
-         if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
-      enddo
-      amp_matrix(:) = 2.0*amp_matrix(:)
-      write(*,*) 'amp_matrix file is read'
-   endif
+
 
    !! --- Initialization !!
    include 'subs/initialize.f90'
@@ -150,22 +149,69 @@ program main
    !forcing
    Fws=20 !sampling extension (beyond f0)
    f_thrhld=0.2*f0
-   n_omega=Fws*ndays !20 per day to construct the curve
-   allocate(omega(n_omega),A_n(n_omega),phi(n_omgea))
-   delta_omega=2*pi/86400./ndays
+   Omgrange=3000
+   n_omega=Fws*Omgrange !20 per day to construct the curve
+   allocate(omega(n_omega))
+   allocate(A_n(n_omega))
+   allocate(phi(n_omega))
+   allocate(amp_matrix_rand(nsteps))
+   write(*,*) 'omega, A_n, and phi are allocated'
+   delta_omega=2*pi/86400./Omgrange
    !construct Amp frequency curve
+   amp = 1.0
    do i = 1, n_omega !1e*5
       omega(i) = i*delta_omega
-      phi(i)= ran2(seed)*2.0*pi
+      phi(i)= ran2(iseed)*2.0*pi
       if(omega(i).le.f_thrhld) then
             A_n(i) = amp
       else
             A_n(i) = amp*(f_thrhld/omega(i))
       endif
-      ! write(21,*) omega(i)/f,A_n(i)**2
-      ! flush(21)
    enddo
-   write(*,*) 'Amp frequency chart is constructed'
+   open(unit=21,file='forcing_frequency_dist.dat',access='sequential',form='formatted',action='write')
+   do i = 1, n_omega !1e*5
+      write(21,'(3e15.6)') omega(i)/f0,A_n(i)**2,phi(i)
+   end do
+   close(21)
+   ! ! Read ampmatrix
+   ! write(*,*) 'Amp frequency chart is constructed'
+   ! if ( ifsteady .eqv. .true. ) then
+   !    amp_matrix(:) = 0.
+   ! elseif ( ifsteady .eqv. .false. ) then
+   !    open(99, file = 'amp_matrix')
+   !    write(*,*) 'amp_matrix file is opened'
+   !    do it = 1,864000
+   !       read(99,*) amp_matrix(it)
+   !       if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
+   !    enddo
+   !    amp_matrix(:) = 2.0*amp_matrix(:)
+   !    write(*,*) 'amp_matrix file is read'
+   ! endif
+   ! get amp_matrix
+   if (iou_method==0) then
+      do itt = 1, nsteps
+         time = (itt-1)*dt
+         amp_forcing = 0.
+         amp_forcing=sum(A_n*sin(omega*time+phi))
+         amp_matrix(itt)=amp_forcing
+         rms_amp = rms_amp + amp_forcing**2
+      enddo
+      close(20)
+      rms_amp = rms_amp/nsteps
+      rms_amp = sqrt(rms_amp)
+      ampfactor = c_sigma**2/rms_amp
+      amp_matrix=amp_matrix*ampfactor*2.0;
+      open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
+      do itt = 1, nsteps
+         write(20,'(2e15.6)') time/86400, amp_matrix(itt)
+      enddo
+      write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
+      ! call get_tau_amp_AR(time,amp_matrix(its))
+      write(*,*) 'time, read first forcing step', time, amp_matrix(its)
+   else if(iou_method==1) then
+      ! the first step
+      call OU_Euler(amp_load,amp_matrix(its),c_theta,c_mu,c_sigma)
+   end if
    ! apply amp_matrix
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
@@ -227,6 +273,8 @@ program main
    Vek(:,:,2) = Vek(:,:,1) + dt*rhs_Vek(:,:)
    time = dt
    its = its + 1
+   call OU_Euler(amp_matrix(its-1),amp_matrix(its),c_theta,c_mu,c_sigma)
+   ! call get_tau_amp_AR(time,amp_matrix(its))
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
    !
@@ -242,8 +290,7 @@ program main
       enddo
 
       include 'subs/IOheader.f90' 
-      call date_and_time(VALUES=values)
-      iseed = -(values(8)+values(7)+values(6))
+
    !==============================================================      
    !
    !      subsequent time steps
@@ -318,6 +365,8 @@ program main
       Vek(:,:,3) = Vek(:,:,1) + 2*dt * rhs_Vek(:,:)
       time = its*dt
       today=time/86400
+      ! call get_tau_amp_AR(time,amp_matrix(its+1))
+      call OU_Euler(amp_matrix(its),amp_matrix(its+1),c_theta,c_mu,c_sigma)
       taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its+1))
 
       !
@@ -367,7 +416,7 @@ program main
       enddo
       enddo
 
-      write(300,*),its, time/86400., ke1/nx/ny, ke2/nx/ny
+      write(300,'(i6,2f12.4,2e12.4)'),its, time/86400., amp_matrix(its), ke1/nx/ny, ke2/nx/ny
       call flush(300)
 
       if(nsteps.lt.start_movie.and.save_movie) then
@@ -585,41 +634,42 @@ program main
    enddo
    write(0,*) icount+icount_srt,time,nspecfile,iftcount+iftcount_srt
    close(0)
-
+   open(1,file='restart_amp')
+   amp_save=amp_matrix(nsteps)
+      write(1,*) amp_load,amp_save
+   close(1)
+   print*, 'Restart file saved at',time/86400
+   print*, 'FFT restarting index saved at',iftcount+iftcount_srt
+   print*, 'Snapshot restarting index saved at',icount+icount_srt
+   print*, 'Amp_matrix at the end of the previous simulation is saved',amp_save
 end program main
 
 
-
-
-subroutine get_tau_amp_AR(time1,amp1)
+subroutine OU_Euler(amp1,amp2,c1,c2,c3)
    use data_initial
-   real,intent(in) :: time1
-   real,intent(out) :: amp1
-   real amp_forcing,ran2
-   amp1=0.0
-   amp1=sum(A_n*sin(omega*time1 + phi))
-end subroutine
-
-subroutine shuffle_phi
-   use data_initial
-   real ran2
-   integer iw
-   do iw = 1, n_omega !1e*5
-      phi(iw)= ran2(iseed)*2.0*pi
-   end do
-   write(*,*) 'phi for stochastic forcing is shuffled from 1 to',n_omega
-end subroutine 
-
-subroutine Euler_Maruyama(amp1,amp2)
-   use data_initial
-   real ran2,volsqrdt
-   integer i,j
-   ! set dt to be unity - could add as input...
-   ! set in data_initial's parameters.f90
+   real ran2,ran1,gasdev
+   real ff,gg,dw,sigma
+   real,intent(in) :: c1,c2,c3,amp1
+   real,intent(out):: amp2
+   !  c1: theta = 1/tau
+   !  c2: mu
+   !  c3: variance of signal, sigma=sqrt(c3*(2*c1))
+   !  set dt to be unity - could add as input...
+   !  set in data_initial's parameters.f90
    
-   ! pre set vol*sqrt(dt) vol to reduce run time
-   volsqrdt = vol*sqrt(dt);
-   amp2 = amp1 + theta*(mu - s0)*dt + ran2(iseed)*volsqrdt;
+   !  pre set vol*sqrt(dt) vol to reduce run time
+   !  multiplied by the square root of DT_SMALL.
+   !  x_new = x_old+ ff * dt + gg * dw
+   !  x_new = x_old*exp(-theta*dt) + (1-exp(-theta*dt))*(mu - xold)*dt + r1*sigma*sqrt(dt)*sqrt((1-exp(-2*theta*dt))/(2*theta));
+   sigma=sqrt(c3*(2*c1))
+   ff=(c2-amp1)*c1
+   gg=sigma
+   dw=gasdev(iseed)*sqrt(dt)
+      
+   amp2 = amp1 + ff*dt + gg*dw
+   ! write(*,*) 'OU process input (amp1,c1,c2,c3)',amp1,c1,c2,c3
+   ! write(*,*) 'OU process input (ff,gg,dw)',ff,gg,dw
+   ! write(*,*) 'OU process output (randn*sqrt(dt),amp2)',dw,amp2
 end subroutine
 
 FUNCTION gasdev(idum) 

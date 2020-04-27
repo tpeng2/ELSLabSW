@@ -37,7 +37,7 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 50., totaltime = 86400 * ndays )
+  parameter ( ndays= 1200., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 
@@ -55,3 +55,5 @@
   parameter ( restart = .true. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
+  ! ---   O-U process (Euler method)
+  parameter(iou_method=1, c_theta=5.*f0, c_mu=0.,  c_sigma=0.01)

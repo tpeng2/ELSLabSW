@@ -78,7 +78,9 @@
          time = 0.  !in second
          restart_from=time
          print*,'Restart from',restart_from, 'day','icount,iftcount',icount,iftcount
-
+         ! forcing
+         amp_load=0.0
+         amp_save=0.0
           ! add seed IC
           tmp(1) = Lx/8.
           do j = 1,ny
@@ -107,9 +109,16 @@
           enddo
           read(0,*) icount_srt,time,nspecfile,iftcount_srt
           close(0)
+          ! Read forcing data
+          open(1,file='restart_amp')
+          read(1,*) amp_save,amp_load ! inverse order when saving these 
+          close(1)
          restart_from=time/86400
          print*, 'Restart from', restart_from, 'day'
- 
+         print*, 'FFT index begins with',iftcount_srt
+         print*, 'snapshot index begins with',icount_srt
+         print*, 'Amp_matrix at the end of the previous simulation is loaded',amp_load
+
 !         if (restart_from == 999 ) then
 !            time = 0
 !            icount = 0
