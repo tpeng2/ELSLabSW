@@ -31,7 +31,7 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.)   
+  parameter ( hek = 50.e8)   
 
  ! ---  Time ---
 
