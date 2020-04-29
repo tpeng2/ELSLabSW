@@ -31,13 +31,13 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.)   
+  parameter ( hek = 50.e8)   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1200., totaltime = 86400 * ndays )
+  parameter ( ndays= 2000., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 
@@ -57,4 +57,4 @@
 !  parameter ( restart = .false. , use_ramp = .false. )
 
   ! ---   O-U process (Euler method)
-  parameter(iou_method=0, c_theta=5.*f0, c_mu=0.,  c_sigma=0.01)
+  parameter(iou_method=0, c_theta=5.*f0, c_mu=0.,  c_sigma=0.1)

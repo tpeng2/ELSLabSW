@@ -200,8 +200,9 @@ program main
          close(20)
          rms_amp = rms_amp/nsteps
          rms_amp = sqrt(rms_amp)
-         ampfactor = c_sigma**2/rms_amp
+         ampfactor = c_sigma/rms_amp
          amp_matrix=amp_matrix*ampfactor*2.0;
+         write(*,*) 'amp_matrix is devided by c_sigma/rms_amp',c_sigma/rms_amp,'and with a scaling factor',2.0
          open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
          do itt = 1, nsteps
             write(20,'(2e15.6)') time/86400, amp_matrix(itt)
