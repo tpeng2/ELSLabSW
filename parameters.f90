@@ -31,7 +31,7 @@
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.e8)   
+  parameter ( hek = 50.)   
 
  ! ---  Time ---
 
@@ -50,10 +50,11 @@
 
   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
 
-  parameter ( ifsteady = .true., forcingtype=1) ! forcingtype =1, sine wave, =2 O-U process (AR1)
+  parameter ( ifsteady = .false., forcingtype=0) 
+  ! forcingtype =0, taux=const in y , =1 cos(y)
 
-  parameter ( restart = .true. , use_ramp = .false. )
+  parameter ( restart = .false. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
   ! ---   O-U process (Euler method)
-  parameter(iou_method=1, c_theta=5.*f0, c_mu=0.,  c_sigma=0.01)
+  parameter(iou_method=0, c_theta=5.*f0, c_mu=0.,  c_sigma=0.01)

@@ -188,29 +188,33 @@ program main
    !    write(*,*) 'amp_matrix file is read'
    ! endif
    ! get amp_matrix
-   if (iou_method==0) then
-      do itt = 1, nsteps
-         time = (itt-1)*dt
-         amp_forcing = 0.
-         amp_forcing=sum(A_n*sin(omega*time+phi))
-         amp_matrix(itt)=amp_forcing
-         rms_amp = rms_amp + amp_forcing**2
-      enddo
-      close(20)
-      rms_amp = rms_amp/nsteps
-      rms_amp = sqrt(rms_amp)
-      ampfactor = c_sigma**2/rms_amp
-      amp_matrix=amp_matrix*ampfactor*2.0;
-      open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
-      do itt = 1, nsteps
-         write(20,'(2e15.6)') time/86400, amp_matrix(itt)
-      enddo
-      write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
-      ! call get_tau_amp_AR(time,amp_matrix(its))
-      write(*,*) 'time, read first forcing step', time, amp_matrix(its)
-   else if(iou_method==1) then
+   if (ifsteady==.false.) then
+      if(iou_method==0) then
+         do itt = 1, nsteps
+            time = (itt-1)*dt
+            amp_forcing = 0.
+            amp_forcing=sum(A_n*sin(omega*time+phi))
+            amp_matrix(itt)=amp_forcing
+            rms_amp = rms_amp + amp_forcing**2
+         enddo
+         close(20)
+         rms_amp = rms_amp/nsteps
+         rms_amp = sqrt(rms_amp)
+         ampfactor = c_sigma**2/rms_amp
+         amp_matrix=amp_matrix*ampfactor*2.0;
+         open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
+         do itt = 1, nsteps
+            write(20,'(2e15.6)') time/86400, amp_matrix(itt)
+         enddo
+         write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
+         ! call get_tau_amp_AR(time,amp_matrix(its))
+         write(*,*) 'time, read first forcing step', time, amp_matrix(its)
+      else if(iou_method==1) then
       ! the first step
       call OU_Euler(amp_load,amp_matrix(its),c_theta,c_mu,c_sigma)
+      end if
+   elseif (ifsteady) then !ifsteady
+      amp_matrix(:) = 0.
    end if
    ! apply amp_matrix
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
@@ -273,7 +277,9 @@ program main
    Vek(:,:,2) = Vek(:,:,1) + dt*rhs_Vek(:,:)
    time = dt
    its = its + 1
-   call OU_Euler(amp_matrix(its-1),amp_matrix(its),c_theta,c_mu,c_sigma)
+   if(ifsteady==.false. .and. iou_method==1) then
+      call OU_Euler(amp_matrix(its-1),amp_matrix(its),c_theta,c_mu,c_sigma)
+   endif
    ! call get_tau_amp_AR(time,amp_matrix(its))
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
@@ -366,7 +372,9 @@ program main
       time = its*dt
       today=time/86400
       ! call get_tau_amp_AR(time,amp_matrix(its+1))
-      call OU_Euler(amp_matrix(its),amp_matrix(its+1),c_theta,c_mu,c_sigma)
+      if(ifsteady==.false. .and. iou_method==1) then
+         call OU_Euler(amp_matrix(its),amp_matrix(its+1),c_theta,c_mu,c_sigma)
+      endif
       taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its+1))
 
       !

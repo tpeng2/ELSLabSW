@@ -59,7 +59,11 @@
 
        do j = 1,ny
           y = -Ly/2. + (j-1)*dy
-          taux_steady(:,j) = tau0*cos(twopi*y/Ly)
+          if(forcingtype.eq.0) then
+            taux_steady(:,j) = tau0
+          elseif (forcingtype.eq.1) then
+            taux_steady(:,j) = tau0*cos(twopi*y/Ly)
+          endif
        enddo
        array = taux_steady
        include 'subs/bndy.f90'
