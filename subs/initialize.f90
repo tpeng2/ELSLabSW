@@ -63,6 +63,9 @@
             taux_steady(:,j) = tau0
           elseif (forcingtype.eq.1) then
             taux_steady(:,j) = tau0*cos(twopi*y/Ly)
+         elseif (forcingtype.eq.2) then
+            taux_steady(:,j) = tau0*(1.0/3.0*cos(twopi*y/Ly)&
+            +1.0/3.0*cos(twopi*y/Ly*4.0)+1.0/3.0*cos(twopi*y/Ly*8.0))
           endif
        enddo
        array = taux_steady

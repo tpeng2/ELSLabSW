@@ -50,10 +50,10 @@
 
   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
 
-  parameter ( ifsteady = .false., forcingtype=0) 
+  parameter ( ifsteady = .false., forcingtype=2) 
   ! forcingtype =0, taux=const in y , =1 cos(y)
 
-  parameter ( restart = .false. , use_ramp = .false. )
+  parameter ( restart = .true. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
   ! ---   O-U process (Euler method)

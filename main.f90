@@ -84,7 +84,7 @@ program main
    real*4 kex1_spec_tb(0:nx/2,1:ntsrow),key1_spec_tb(0:ny/2,1:ntsrow),tstime(1:ntsrow)
    real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
    real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
-   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
+   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,uagfft,vagfft
    double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
 
    integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
@@ -102,6 +102,7 @@ program main
    character(88) string1, string2, string3, string4, string5
    character(88) string1i, string2i, string3i, string4i, string5i
    character(88) string6, string7, string8, string9, string10
+   character(88) string6i, string7i, string8i, string9i, string10i
    character(88) string11, string12, string13, string14, string15
    character(88) string16, string17, string18, string19, string20
    ! random number
@@ -173,23 +174,25 @@ program main
       write(21,'(3e15.6)') omega(i)/f0,A_n(i)**2,phi(i)
    end do
    close(21)
-   ! ! Read ampmatrix
-   ! write(*,*) 'Amp frequency chart is constructed'
-   ! if ( ifsteady .eqv. .true. ) then
-   !    amp_matrix(:) = 0.
-   ! elseif ( ifsteady .eqv. .false. ) then
-   !    open(99, file = 'amp_matrix')
-   !    write(*,*) 'amp_matrix file is opened'
-   !    do it = 1,864000
-   !       read(99,*) amp_matrix(it)
-   !       if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
-   !    enddo
-   !    amp_matrix(:) = 2.0*amp_matrix(:)
-   !    write(*,*) 'amp_matrix file is read'
-   ! endif
-   ! get amp_matrix
-   if (ifsteady==.false.) then
+   ! Read ampmatrix
+   write(*,*) 'Amp frequency chart is constructed'
+   if ( ifsteady .eqv. .true. ) then
+      write(*,*)'steady forcing'
+      amp_matrix(:) = 0.
+   elseif ( ifsteady .eqv. .false. ) then
+      write(*,*)'unsteady forcing'
       if(iou_method==0) then
+         write(*,*)'iou_method=0, read Amp_matrix file'
+         open(99, file = 'amp_matrix')
+         write(*,*) 'amp_matrix file is opened'
+         do it = 1,864000
+            read(99,*) amp_matrix(it)
+            if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
+         enddo
+         amp_matrix(:) = 2.0*amp_matrix(:)
+         write(*,*) 'amp_matrix file is read'
+      else if(iou_method==1) then
+         write(*,*)'iou_method=1, generate Amp_matrix array before simulation'
          do itt = 1, nsteps
             time = (itt-1)*dt
             amp_forcing = 0.
@@ -210,13 +213,13 @@ program main
          write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
          ! call get_tau_amp_AR(time,amp_matrix(its))
          write(*,*) 'time, read first forcing step', time, amp_matrix(its)
-      else if(iou_method==1) then
-      ! the first step
-      call OU_Euler(amp_load,amp_matrix(its),c_theta,c_mu,c_sigma)
-      end if
-   elseif (ifsteady) then !ifsteady
-      amp_matrix(:) = 0.
-   end if
+      else if(iou_method==2) then
+         write(*,*)'iou_method=2, Euler-method for stochastic Lagevin equation'
+         ! the first step
+         call OU_Euler(amp_load,amp_matrix(its),c_theta,c_mu,c_sigma)
+      endif
+   endif
+
    ! apply amp_matrix
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
@@ -278,7 +281,7 @@ program main
    Vek(:,:,2) = Vek(:,:,1) + dt*rhs_Vek(:,:)
    time = dt
    its = its + 1
-   if(ifsteady==.false. .and. iou_method==1) then
+   if(ifsteady==.false. .and. iou_method==2) then
       call OU_Euler(amp_matrix(its-1),amp_matrix(its),c_theta,c_mu,c_sigma)
    endif
    ! call get_tau_amp_AR(time,amp_matrix(its))
@@ -373,7 +376,7 @@ program main
       time = its*dt
       today=time/86400
       ! call get_tau_amp_AR(time,amp_matrix(its+1))
-      if(ifsteady==.false. .and. iou_method==1) then
+      if(ifsteady==.false. .and. iou_method==2) then
          call OU_Euler(amp_matrix(its),amp_matrix(its+1),c_theta,c_mu,c_sigma)
       endif
       taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its+1))
@@ -442,13 +445,14 @@ program main
    !                include 'subs/calc_q.f90'
             include 'subs/diags.f90'
             icount = icount + 1
-            include 'subs/dump_bin.f90'
+            ! include 'subs/dump_bin.f90' ! Currently no need !
             print*, 'writing data No.', icount
          endif
       endif  !output
 
       if ( time.gt.0*86400. ) then
          if ( mod(its,ispechst).eq.0 ) then
+            include 'subs/dump_bin.f90' !decompose G-AG
             count_specs_1 = count_specs_1 + 1
             count_specs_2 = count_specs_2 + 1 
             count_specs_ek = count_specs_ek + 1
@@ -543,23 +547,41 @@ program main
             ke2_spec = ke2_spec + spectrum
             vfft(:,:,2)=datc
 
-            datr(:,:) = forcing_total(1:nx,1:ny)
-            include 'fftw_stuff/spec1.f90'
-            for_to_spec = for_to_spec + spectrum
-            ftotalfft=datc
+            ! datr(:,:) = forcing_total(1:nx,1:ny)
+            ! include 'fftw_stuff/spec1.f90'
+            ! for_to_spec = for_to_spec + spectrum
+            ! ftotalfft=datc
 
-            datr(:,:) = forcing_ag(1:nx,1:ny)
-            include 'fftw_stuff/spec1.f90'
-            for_ag_spec = for_ag_spec + spectrum
-            fagfft=datc
+            ! datr(:,:) = forcing_ag(1:nx,1:ny)
+            ! include 'fftw_stuff/spec1.f90'
+            ! for_ag_spec = for_ag_spec + spectrum
+            ! fagfft=datc
 
-            datr(:,:) = Uek(1:nx,1:ny,2)       
-            include 'fftw_stuff/spec1.f90'
-            ke_ek_spec =  ke_ek_spec + spectrum
+            ! datr(:,:) = Uek(1:nx,1:ny,2)       
+            ! include 'fftw_stuff/spec1.f90'
+            ! ke_ek_spec =  ke_ek_spec + spectrum
 
-            datr(:,:) = Vek(1:nx,1:ny,2)       
+            ! datr(:,:) = Vek(1:nx,1:ny,2)       
+            ! include 'fftw_stuff/spec1.f90'
+            ! ke_ek_spec =  ke_ek_spec + spectrum
+
+            datr(:,:) = u_ag(1:nx,1:ny,1)
             include 'fftw_stuff/spec1.f90'
-            ke_ek_spec =  ke_ek_spec + spectrum
+            ke2_spec = ke2_spec + spectrum
+            uagfft(:,:,1)=datc            
+            datr(:,:) = u_ag(1:nx,1:ny,2)
+            include 'fftw_stuff/spec1.f90'
+            ke2_spec = ke2_spec + spectrum
+            uagfft(:,:,2)=datc
+
+            datr(:,:) = v_ag(1:nx,1:ny,1)
+            include 'fftw_stuff/spec1.f90'
+            ke2_spec = ke2_spec + spectrum
+            vagfft(:,:,1)=datc            
+            datr(:,:) = v_ag(1:nx,1:ny,2)
+            include 'fftw_stuff/spec1.f90'
+            ke2_spec = ke2_spec + spectrum
+            vagfft(:,:,2)=datc
 
             iftcount=iftcount+1
             ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
