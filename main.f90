@@ -30,6 +30,8 @@ program main
    ! random number
    real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
    real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
+   real u_ag_pls(0:nnx,0:nny,nz), v_ag_pls(0:nnx,0:nny,nz) !also need complex part
+   real u_ag_mns(0:nnx,0:nny,nz), v_ag_mns(0:nnx,0:nny,nz) !also need complex part
    real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
    real eta_ag(0:nnx,0:nny), eta_qg(0:nnx,0:nny)
    real Psurf(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
