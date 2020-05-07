@@ -1,10 +1,10 @@
 
-       WRITE(which,'(I3)') 100 + icount
+       WRITE(which,'(I6)') 100000 + ignucount
        string1 = 'data/wek'  // '_' // which(1:3)
        open(11, file = string1, status = 'unknown')
 
 
-       icount = icount + 1
+       ignucount = ignucount + 1
 
 
        do j = 11,11  !write header on files

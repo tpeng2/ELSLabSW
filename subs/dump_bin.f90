@@ -26,7 +26,7 @@
 !  string17 = 'data/eta_qg'  // '_' // trim(which)
 !  string18 = 'data/eta_ag'  // '_' // trim(which)
 !  string19 = 'data/div_ek'  // '_' // trim(which)
-
+   string20 = 'data/zeta_Gf0' // '_' // trim(which)
 
 ! Note indices for (u,v,eta ...) starting with 0, useful part is 1:256
   !  real u_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz), v_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
@@ -146,4 +146,9 @@
 !        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
 !   write(32,REC=1) div_ek(:,:)
 !   close(32)
+
+  open(unit=33,file=string20,access='DIRECT',&
+  & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+  write(33,REC=1) (((zeta_G(i,j,k)/f0,i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(33)
 

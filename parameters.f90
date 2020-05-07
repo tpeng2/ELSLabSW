@@ -37,14 +37,14 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 2000., totaltime = 86400 * ndays )
+  parameter ( ndays= 1000., totaltime = 86400 * ndays )
 
-  parameter ( nsteps = totaltime/dt,fileperday=12 )
+  parameter ( nsteps = totaltime/dt,fileperday=16 )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
   parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
  
-  parameter (itape=86400*10/dt,ispechst=12) !spectrum output file, output one spectra per ispechst
+  parameter (itape=86400*10/dt,ispechst=nsteps/ndays/fileperday) !spectrum output file, output one spectra per ispechst
 
   parameter(save2dfft=.true.,calc1Dspec=.false. )
 
@@ -53,7 +53,7 @@
   parameter ( ifsteady = .false., forcingtype=2) 
   ! forcingtype =0, taux=const in y , =1 cos(y)
 
-  parameter ( restart = .true. , use_ramp = .false. )
+  parameter ( ifrestart = .true. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
   ! ---   O-U process (Euler method)

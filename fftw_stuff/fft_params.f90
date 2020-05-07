@@ -19,3 +19,5 @@
     integer, dimension(nx/2+1,ny) :: nk2,nk
     real, dimension(nx/2+1,ny) :: nkf
     INTEGER ikx,iky
+
+    double complex eye,M

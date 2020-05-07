@@ -8,5 +8,6 @@
      complex eye,M,eta_ag_pl,eta_ag_mi
      eye=(0.0,1.0)
      c=g_rd*He
-     M=eye*sqrt(c**2*kappa**2+f0**2)*g/c**2
+     M=eye*sqrt(c**2*kappa**2+f0**2)*g/c**2 !dim: same as eta_A
+     etaagfft_pls=1/(2*M)*(M)
      

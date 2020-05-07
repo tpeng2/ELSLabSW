@@ -28,10 +28,10 @@
           thickness = array
 
           do j = 1,ny
-          do i = 1,nx
-             zeta(i,j) =  (vv(i,j)-vv(i-1,j))/dx    &
-             &         -  (uu(i,j)-uu(i,j-1))/dy 
-          enddo
+            do i = 1,nx
+               zeta(i,j) =  (vv(i,j)-vv(i-1,j))/dx    &
+               &         -  (uu(i,j)-uu(i,j-1))/dy 
+            enddo
           enddo
 
           array = zeta
@@ -39,12 +39,12 @@
           zeta = array
  
           do j = 1, ny
-          do i = 1, nx
-             q(i,j,k) = zeta(i,j) -0.25*f(j)*(thickness(i,j)+    &
-                      &                       thickness(i-1,j)+  &
-                      &                       thickness(i,j-1)+  &
-                      &                       thickness(i-1,j-1) )
-          enddo
+            do i = 1, nx
+               q(i,j,k) = zeta(i,j) -0.25*f(j)*(thickness(i,j)+    &
+                        &                       thickness(i-1,j)+  &
+                        &                       thickness(i,j-1)+  &
+                        &                       thickness(i-1,j-1) )
+            enddo
           enddo
 
           array(:,:) = q(:,:,k)
@@ -85,12 +85,12 @@
        psi(:,:,2) = array(:,:)
 
        do j = 1,ny
-       do i = 1,nx
-          v_qg(i,j,1) =  (psi(i+1,j,1)-psi(i,j,1))/dx
-          u_qg(i,j,1) = -(psi(i,j+1,1)-psi(i,j,1))/dy
-          v_qg(i,j,2) =  (psi(i+1,j,2)-psi(i,j,2))/dx
-          u_qg(i,j,2) = -(psi(i,j+1,2)-psi(i,j,2))/dy
-       enddo
+         do i = 1,nx
+            v_qg(i,j,1) =  (psi(i+1,j,1)-psi(i,j,1))/dx
+            u_qg(i,j,1) = -(psi(i,j+1,1)-psi(i,j,1))/dy
+            v_qg(i,j,2) =  (psi(i+1,j,2)-psi(i,j,2))/dx
+            u_qg(i,j,2) = -(psi(i,j+1,2)-psi(i,j,2))/dy
+         enddo
        enddo
 
        array(:,:) = v_qg(:,:,1)
@@ -148,13 +148,14 @@
        u_ag(:,:,2) = array(:,:)
  
        do j = 1,ny
-       do i = 1,nx    
-          eta_qg(i,j) = (f0/gprime(2))*0.25*(psi(i,j,2)-psi(i,j,1)   &
-                      &               + psi(i+1,j,2)-psi(i+1,j,1)   &
-                      &               + psi(i,j+1,2)-psi(i,j+1,1)   &
-                      &               + psi(i+1,j+1,2)-psi(i+1,j+1,1))
-       enddo
-       enddo            
+         do i = 1,nx    
+            eta_qg(i,j) = (f0/gprime(2))*0.25*(psi(i,j,2)-psi(i,j,1)   &
+                        &               + psi(i+1,j,2)-psi(i+1,j,1)   &
+                        &               + psi(i,j+1,2)-psi(i,j+1,1)   &
+                        &               + psi(i+1,j+1,2)-psi(i+1,j+1,1))
+         enddo
+       enddo  
+
        array(:,:) = eta_qg(:,:)
        include 'subs/bndy.f90'
        eta_qg(:,:) = array(:,:)
@@ -168,6 +169,24 @@
        array(:,:) = eta_ag(:,:)
        include 'subs/bndy.f90'
        eta_ag(:,:) = array(:,:)
+
+       do k=1,nz
+         uu=u_qg(:,:,k)
+         vv=v_qg(:,:,k)
+         ! zeta_G
+         do j = 1,ny
+            do i = 1,nx
+               zeta_G(i,j,k) =  (vv(i,j)-vv(i-1,j))/dx    &
+               &         -  (uu(i,j)-uu(i,j-1))/dy 
+            enddo ! i-loop
+         enddo ! j-koop
+         array = zeta_G(:,:,k)
+         include 'subs/bndy.f90'
+         zeta_G(:,:,k)= array
+       enddo ! k-loop
+
+
+
 !     ke1 = 0.
 !     ke2 = 0.
 !     do j = 1, ny

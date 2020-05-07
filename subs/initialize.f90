@@ -79,9 +79,9 @@
 
 !   --- Restart
        icount = 0 !for  output file index
-       iftcount =0
-
-       if ( restart .eqv. .false. ) then
+       iftcount = 0
+       ignucount = 0
+       if ( ifrestart .eqv. .false. ) then
          time = 0.  !in second
          restart_from=time
          print*,'Restart from',restart_from, 'day','icount,iftcount',icount,iftcount

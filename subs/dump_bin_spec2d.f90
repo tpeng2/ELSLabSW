@@ -5,13 +5,13 @@
         string2i = 'specdata/vfft2d_i'  // '_' // trim(which3)
         string3 = 'specdata/ftotalfft_r'  // '_' // trim(which3)
         string3i = 'specdata/ftotalfft_i'  // '_' // trim(which3)
-        string4 = 'specdata/fagfft_r'  // '_' // trim(which3)
-        string4i = 'specdata/fagfft_i'  // '_' // trim(which3)
-        string5 = 'specdata/uagfft_r'  // '_' // trim(which3)
-        string5i = 'specdata/uagfft_i'  // '_' // trim(which3)
-        string6 = 'specdata/vagfft_r'  // '_' // trim(which3)
-        string6i = 'specdata/vagfft_i'  // '_' // trim(which3)
-        !ufft,vfft,ftotalfft,fagfft
+        string4 = 'specdata/f_agfft_r'  // '_' // trim(which3)
+        string4i = 'specdata/f_agfft_i'  // '_' // trim(which3)
+        string5 = 'specdata/u_agfft_r'  // '_' // trim(which3)
+        string5i = 'specdata/u_agfft_i'  // '_' // trim(which3)
+        string6 = 'specdata/v_agfft_r'  // '_' // trim(which3)
+        string6i = 'specdata/v_agfft_i'  // '_' // trim(which3)
+        !ufft,vfft,ftotalfft,f_agfft
 
         open(unit=9999,file=string1,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
@@ -42,27 +42,27 @@
 
         ! open(unit=9993,file=string4,access='DIRECT',&
         ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-        ! write(9993,REC=1) (real(fagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+        ! write(9993,REC=1) (real(f_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
         ! close(9993)
         ! open(unit=9992,file=string4i,access='DIRECT',&
         ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-        ! write(9992,REC=1) (aimag(fagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+        ! write(9992,REC=1) (aimag(f_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
         ! close(9992)
 
         open(unit=9991,file=string5,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-        write(9991,REC=1) ((real(uagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+        write(9991,REC=1) ((real(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
         close(9991)
         open(unit=9990,file=string5i,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-        write(9990,REC=1) ((aimag(uagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+        write(9990,REC=1) ((aimag(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
         close(9990)
 
         open(unit=9989,file=string6,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-        write(9989,REC=1) ((real(vagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+        write(9989,REC=1) ((real(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
         close(9989)
         open(unit=9988,file=string6i,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-        write(9988,REC=1) ((aimag(vagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+        write(9988,REC=1) ((aimag(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
         close(9988)

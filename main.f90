@@ -9,7 +9,7 @@ module data_initial
    real restart_from
    integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
    integer ftsubsmprto,forcingtype
-   logical restart, use_ramp, ifsteady
+   logical ifrestart, use_ramp, ifsteady
    logical calc1Dspec,save_movie,save2dfft
    real c_theta,c_mu,c_sigma ! ---   O-U process (Euler method)
    integer iou_method
@@ -23,17 +23,24 @@ module data_initial
    real,allocatable :: omega(:),A_n(:),phi(:)
 end module data_initial
 
+module G_AG_decomp
+   use data_initial
+   double complex eye
+end module G_AG_decomp
+
 program main
 
    use data_initial
+   use G_AG_decomp
    implicit none
    ! random number
    real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
    real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
    real u_ag_pls(0:nnx,0:nny,nz), v_ag_pls(0:nnx,0:nny,nz) !also need complex part
    real u_ag_mns(0:nnx,0:nny,nz), v_ag_mns(0:nnx,0:nny,nz) !also need complex part
-   real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
+   real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz), zeta_G(0:nnx,0:nny,nz)
    real eta_ag(0:nnx,0:nny), eta_qg(0:nnx,0:nny)
+   real eta_ag_pls(0:nnx,0:nny), eta_ag_mns(0:nnx,0:nny)
    real Psurf(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
    real div(0:nnx,0:nny), zeta(0:nnx,0:nny)
    real B(0:nnx,0:nny), B_nl(0:nnx,0:nny)
@@ -86,8 +93,12 @@ program main
    real*4 kex1_spec_tb(0:nx/2,1:ntsrow),key1_spec_tb(0:ny/2,1:ntsrow),tstime(1:ntsrow)
    real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
    real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
-   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,uagfft,vagfft
+   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,u_gfft,v_gfft
+   double complex,dimension(nx/2+1,ny,nz) :: u_agfft,u_agfft_pls,u_agfft_mns
+   double complex,dimension(nx/2+1,ny,nz) :: v_agfft,v_agfft_pls,v_agfft_mns
    double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
+   double complex,dimension(nx/2+1,ny) :: eta_agfft,eta_agfft_pls,eta_agfft_mns
+   double complex,dimension(nx/2+1,ny) :: div_fft,div_fft_pls,div_fft_mns
 
    integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
    !subsampling arrays
@@ -96,7 +107,7 @@ program main
    !subsampling size
    integer szsubx,szsuby,szftrdrow,szftrdcol
    !I/O info
-   integer icount,iftcount, count_specs_1, count_specs_2, count_specs_ek
+   integer icount,ignucount,iftcount, count_specs_1, count_specs_2, count_specs_ek
    integer icount_srt,iftcount_srt
    integer count_specs_to, count_specs_ag
 
@@ -107,9 +118,12 @@ program main
    character(88) string6i, string7i, string8i, string9i, string10i
    character(88) string11, string12, string13, string14, string15
    character(88) string16, string17, string18, string19, string20
+   character(88) string21, string22, string23, string24, string25
    ! random number
    real ran1,ran2,ranf,gasdev
-
+   ! complex number i
+   eye=(0.0,1.0)
+   ! Initialize FFT
    include 'fftw_stuff/fft_params.f90'
    include 'fftw_stuff/fft_init.f90'
    ! Set random number seeds
@@ -119,11 +133,11 @@ program main
    ! === Allocate variables
    szsubx=ceiling(nx/(subsmprto+1e-15))
    szsuby=ceiling(ny/(subsmprto+1e-15))
-   ! szftrdrow=ceiling((nx/2+1)/(ftsubsmprto+1e-15))
-   ! szftrdcol=ceiling(ny/(ftsubsmprto+1e-15))
+
    ! === Define subsampling range in spatial space
    isubx=(/(i, i=1,nx, subsmprto)/)
    isuby=(/(i, i=1,ny, subsmprto)/)
+
    ! === FFT subsmpling, fed with (k,l) pair
    include 'subs/read_kxky_subsmp.f90'
 
@@ -147,81 +161,10 @@ program main
    include 'subs/initialize.f90'
    its=1
    itlocal=1
-   if(restart==.false.)   nspecfile=0
+   if(ifrestart==.false.)   nspecfile=0
    write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
-   !forcing
-   Fws=20 !sampling extension (beyond f0)
-   f_thrhld=0.2*f0
-   Omgrange=3000
-   n_omega=Fws*Omgrange !20 per day to construct the curve
-   allocate(omega(n_omega))
-   allocate(A_n(n_omega))
-   allocate(phi(n_omega))
-   allocate(amp_matrix_rand(nsteps))
-   write(*,*) 'omega, A_n, and phi are allocated'
-   delta_omega=2*pi/86400./Omgrange
-   !construct Amp frequency curve
-   amp = 1.0
-   do i = 1, n_omega !1e*5
-      omega(i) = i*delta_omega
-      phi(i)= ran2(iseed)*2.0*pi
-      if(omega(i).le.f_thrhld) then
-            A_n(i) = amp
-      else
-            A_n(i) = amp*(f_thrhld/omega(i))
-      endif
-   enddo
-   open(unit=21,file='forcing_frequency_dist.dat',access='sequential',form='formatted',action='write')
-   do i = 1, n_omega !1e*5
-      write(21,'(3e15.6)') omega(i)/f0,A_n(i)**2,phi(i)
-   end do
-   close(21)
-   ! Read ampmatrix
-   write(*,*) 'Amp frequency chart is constructed'
-   if ( ifsteady .eqv. .true. ) then
-      write(*,*)'steady forcing'
-      amp_matrix(:) = 0.
-   elseif ( ifsteady .eqv. .false. ) then
-      write(*,*)'unsteady forcing'
-      if(iou_method==0) then
-         write(*,*)'iou_method=0, read Amp_matrix file'
-         open(99, file = 'amp_matrix')
-         write(*,*) 'amp_matrix file is opened'
-         do it = 1,864000
-            read(99,*) amp_matrix(it)
-            if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
-         enddo
-         amp_matrix(:) = 2.0*amp_matrix(:)
-         write(*,*) 'amp_matrix file is read'
-      else if(iou_method==1) then
-         write(*,*)'iou_method=1, generate Amp_matrix array before simulation'
-         do itt = 1, nsteps
-            time = (itt-1)*dt
-            amp_forcing = 0.
-            amp_forcing=sum(A_n*sin(omega*time+phi))
-            amp_matrix(itt)=amp_forcing
-            rms_amp = rms_amp + amp_forcing**2
-         enddo
-         close(20)
-         rms_amp = rms_amp/nsteps
-         rms_amp = sqrt(rms_amp)
-         ampfactor = c_sigma/rms_amp
-         amp_matrix=amp_matrix*ampfactor*2.0;
-         write(*,*) 'amp_matrix is devided by c_sigma/rms_amp',c_sigma/rms_amp,'and with a scaling factor',2.0
-         open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
-         do itt = 1, nsteps
-            write(20,'(2e15.6)') time/86400, amp_matrix(itt)
-         enddo
-         write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
-         ! call get_tau_amp_AR(time,amp_matrix(its))
-         write(*,*) 'time, read first forcing step', time, amp_matrix(its)
-      else if(iou_method==2) then
-         write(*,*)'iou_method=2, Euler-method for stochastic Lagevin equation'
-         ! the first step
-         call OU_Euler(amp_load,amp_matrix(its),c_theta,c_mu,c_sigma)
-      endif
-   endif
-
+   !initialize forcing
+   include 'subs/initialize_forcing.f90'
    ! apply amp_matrix
    taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
 
@@ -434,164 +377,50 @@ program main
       call flush(300)
 
       if(nsteps.lt.start_movie.and.save_movie) then
-         if ( mod(its,iout).eq.0 ) then  ! output 
-            include 'subs/div_vort.f90'
-            include 'subs/dump_gnu1a.f90'
-         end if
+
       end if
-
-      if ( its .gt. start_movie ) then
-         if ( mod(its,iout).eq.0 ) then  ! output 
-            include 'subs/div_vort.f90'
-   !                include 'subs/tmp_complex.f90'
-   !                include 'subs/calc_q.f90'
-            include 'subs/diags.f90'
-            icount = icount + 1
-            ! include 'subs/dump_bin.f90' ! Currently no need !
-            print*, 'writing data No.', icount
-         endif
-      endif  !output
-
+         
       if ( time.gt.0*86400. ) then
-         if ( mod(its,ispechst).eq.0 ) then
-            include 'subs/dump_bin.f90' !decompose G-AG
+         if ( mod(its,ispechst).eq.0 ) then  ! output 
+            ! Process data in physical space
+            include 'subs/div_vort.f90' ! get div and zeta
+            !  include 'subs/tmp_complex.f90'
+            !  include 'subs/calc_q.f90'
+            include 'subs/diags.f90' ! get G-AG field
+
+
+            ! FFT for spectrum
             count_specs_1 = count_specs_1 + 1
             count_specs_2 = count_specs_2 + 1 
             count_specs_ek = count_specs_ek + 1
             count_specs_to = count_specs_to + 1
             count_specs_ag = count_specs_ag + 1
 
-            ! 1-Dx
-            if(mod(itlocal,ispechst)==0.and.calc1Dspec) then
-               kex1_spec=0.0
-               kex2_spec=0.0
-               do j = 1,ny
-                  ! u, v at iz=1
-                  datrx(:)=u(1:nx,j,1,2)
-                  include 'fftw_stuff/specx.f90'
-                  kex1_spec =  spectrumx
-                  datrx(:)=v(1:nx,j,1,2)
-                  include 'fftw_stuff/specx.f90'
-                  kex1_spec =  kex1_spec + spectrumx
-                  kex1_spec_tb(:,itsrow)=kex1_spec
-                  !u,v at iz=2
-                  datrx(:)=u(1:nx,j,2,2)
-                  include 'fftw_stuff/specx.f90'
-                  kex2_spec =  kex2_spec + spectrumx
-                  datrx(:)=v(1:nx,j,2,2)
-                  include 'fftw_stuff/specx.f90'
-                  kex2_spec =  kex2_spec + spectrumx
-                  kex2_spec_tb(:,itsrow)=kex2_spec
-                  !Uek 
-                  datrx(:) = Uek(1:nx,j,2)       
-                  include 'fftw_stuff/specx.f90'
-                  kex_ek_spec =  kex_ek_spec + spectrumx
-
-                  datrx(:) = Vek(1:nx,j,2)       
-                  include 'fftw_stuff/specx.f90'
-                  kex_ek_spec =  kex_ek_spec + spectrumx
-                  kex_ek_spec_tb(:,itsrow)=kex_ek_spec
-               enddo
-         
-               !  ! 1-Dy
-               key1_spec=0.0
-               key2_spec=0.0
-               do i = 1,nx
-                  ! u, v at iz=1
-                  datry(:)=u(i,1:ny,1,2)
-                  include 'fftw_stuff/specy.f90'
-                  key1_spec =  key1_spec + spectrumy
-                  datry(:)=v(i,1:ny,1,2)
-                  include 'fftw_stuff/specy.f90'
-                  key1_spec =  key1_spec + spectrumy
-                  key1_spec_tb(:,itsrow)=key1_spec
-                  !u,v at iz=2
-                  datry(:)=u(i,1:ny,2,2)
-                  include 'fftw_stuff/specy.f90'
-                  key2_spec =  key2_spec + spectrumy
-                  datry(:)=v(i,1:ny,2,2)
-                  include 'fftw_stuff/specy.f90'
-                  key2_spec =  key2_spec + spectrumy
-                  key2_spec_tb(:,itsrow)=key2_spec
-                  !Uek,Vek
-                  datry(:) = Uek(i,1:ny,2)  
-                  include 'fftw_stuff/specy.f90'
-                  key_ek_spec =  key_ek_spec + spectrumy
-                  datry(:) = Vek(i,1:ny,2)  
-                  include 'fftw_stuff/specy.f90'
-                  key_ek_spec =  key_ek_spec + spectrumy
-                  key_ek_spec_tb(:,itsrow)=key_ek_spec
-               enddo
-
-               if(itsrow==ntsrow) then
-                  include 'subs/IOoutput.f90'
-               endif !itsrow==ntsrow
-            endif !calc1Dspectrum and every ispechst
-
-            ! 2D !ufft,vfft,etafft,ftotalfft,fagfft
-            datr(:,:) = u(1:nx,1:ny,1,2)       
+            ! 1D fft
+            include 'subs/calc_1d_spec.f90'
+            ! 2D fft
+            include 'subs/calc_1d_spec.f90'
+            ! AG+, AG- decomposition
+            ! 1. eta_A and div in FFT space
+            datr(:,:) = eta_ag(1:nx,1:ny)
             include 'fftw_stuff/spec1.f90'
-            ke1_spec =  ke1_spec + spectrum
-            ufft(:,:,1)=datc
+            for_to_spec = for_to_spec + spectrum
+            eta_agfft=datc
 
-            datr(:,:) = v(1:nx,1:ny,1,2)       
-            include 'fftw_stuff/spec1.f90'
-            ke1_spec =  ke1_spec + spectrum
-            vfft(:,:,1)=datc
-
-            datr(:,:) = u(1:nx,1:ny,2,2)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            ufft(:,:,2)=datc
-
-            datr(:,:) = v(1:nx,1:ny,2,2)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            vfft(:,:,2)=datc
-
-            ! datr(:,:) = forcing_total(1:nx,1:ny)
-            ! include 'fftw_stuff/spec1.f90'
-            ! for_to_spec = for_to_spec + spectrum
-            ! ftotalfft=datc
-
-            ! datr(:,:) = forcing_ag(1:nx,1:ny)
-            ! include 'fftw_stuff/spec1.f90'
-            ! for_ag_spec = for_ag_spec + spectrum
-            ! fagfft=datc
-
-            ! datr(:,:) = Uek(1:nx,1:ny,2)       
-            ! include 'fftw_stuff/spec1.f90'
-            ! ke_ek_spec =  ke_ek_spec + spectrum
-
-            ! datr(:,:) = Vek(1:nx,1:ny,2)       
-            ! include 'fftw_stuff/spec1.f90'
-            ! ke_ek_spec =  ke_ek_spec + spectrum
-
-            datr(:,:) = u_ag(1:nx,1:ny,1)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            uagfft(:,:,1)=datc            
-            datr(:,:) = u_ag(1:nx,1:ny,2)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            uagfft(:,:,2)=datc
-
-            datr(:,:) = v_ag(1:nx,1:ny,1)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            vagfft(:,:,1)=datc            
-            datr(:,:) = v_ag(1:nx,1:ny,2)
-            include 'fftw_stuff/spec1.f90'
-            ke2_spec = ke2_spec + spectrum
-            vagfft(:,:,2)=datc
-
-            iftcount=iftcount+1
-            ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
-            
             ! Write 2-D FFT fields
             if(save2dfft) then
+               iftcount=iftcount+1            
                include 'subs/dump_bin_spec2d.f90'
             endif !itsrow==ntsrow
+
+            ! Write 2-D fields in real space
+             ! if ( mod(its,iout).eq.0 ) then  ! output 
+            if(save_movie) then
+               icount = icount + 1
+               print*, 'writing data No.', icount
+               include 'subs/dump_bin.f90' !output binary files
+               include 'subs/dump_gnu1a.f90' !output gnuplot files
+            endif
          endif
       endif
 
@@ -798,3 +627,13 @@ FUNCTION gasdev(idum)
       !
       return
    end function ran1
+
+
+               
+   ! subroutine FFT_2D_R2C(datr_in,datc_out,nx_in,ny_in)
+   !    use data_initial
+   !    real,intent(in) :: nx_in,ny_in
+   !    real,allocatable :: datr_in(:,:),datr_out(:,:)
+   !    allocate(datr_in(nx_in,ny_in))
+   !    include 'fftw_stuff/spec1.f90'
+   ! end subroutine
