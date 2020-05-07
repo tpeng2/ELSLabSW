@@ -17,21 +17,17 @@ module data_initial
    parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
    !random number
    integer iseed,values(8)
+   ! complex unit (imag)
+   double complex eye
    !forcing subroutine
    real delta_omega,f_thrhld, amp, amp_forcing,rms_amp,ampfactor
    integer n_omega,Fws,Omgrange,itt
    real,allocatable :: omega(:),A_n(:),phi(:)
 end module data_initial
 
-module G_AG_decomp
-   use data_initial
-   double complex eye
-end module G_AG_decomp
 
 program main
-
    use data_initial
-   use G_AG_decomp
    implicit none
    ! random number
    real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
@@ -121,11 +117,12 @@ program main
    character(88) string21, string22, string23, string24, string25
    ! random number
    real ran1,ran2,ranf,gasdev
-   ! complex number i
-   eye=(0.0,1.0)
    ! Initialize FFT
    include 'fftw_stuff/fft_params.f90'
    include 'fftw_stuff/fft_init.f90'
+   ! ===  Finished variables declaration 
+   ! complex number i
+   eye=(0.0,1.0)
    ! Set random number seeds
    call date_and_time(VALUES=values)
    iseed = -(values(8)+values(7)+values(6))

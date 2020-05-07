@@ -1,5 +1,4 @@
-
-    integer*8        :: pr2c, pc2r,vr2cx,vr2cy,vc2rx,vc2ry
+    integer*8 :: pr2c, pc2r,vr2cx,vr2cy,vc2rx,vc2ry
     real  spectrum(0:nx),nkoutput(0:nx)
     real  spectrumx(0:nx/2),spectrumy(0:ny/2)
     double complex,   dimension(nx/2+1,ny) :: datc, c_array
@@ -19,5 +18,4 @@
     integer, dimension(nx/2+1,ny) :: nk2,nk
     real, dimension(nx/2+1,ny) :: nkf
     INTEGER ikx,iky
-
-    double complex eye,M
+    double complex M
