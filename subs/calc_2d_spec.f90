@@ -53,3 +53,24 @@
             datr(:,:) = v_ag(1:nx,1:ny,2)
             include 'fftw_stuff/spec1.f90'
             v_agfft(:,:,2)=datc
+
+            datr(:,:) = u_qg(1:nx,1:ny,1)
+            include 'fftw_stuff/spec1.f90'
+            u_gfft(:,:,1)=datc        
+
+            datr(:,:) = u_qg(1:nx,1:ny,2)
+            include 'fftw_stuff/spec1.f90'
+            u_gfft(:,:,2)=datc
+
+            datr(:,:) = v_qg(1:nx,1:ny,1)
+            include 'fftw_stuff/spec1.f90'
+            v_gfft(:,:,1)=datc       
+
+            datr(:,:) = v_qg(1:nx,1:ny,2)
+            include 'fftw_stuff/spec1.f90'
+            v_gfft(:,:,2)=datc
+
+
+            u_agfft_bc=u_ag(1:nx,1:ny,2)-u_ag(1:nx,1:ny,1)
+            v_agfft_bc=v_ag(1:nx,1:ny,2)-v_ag(1:nx,1:ny,1)
+

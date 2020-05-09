@@ -32,11 +32,10 @@ program main
    ! random number
    real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
    real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
-   real u_ag_pls(0:nnx,0:nny,nz), v_ag_pls(0:nnx,0:nny,nz) !also need complex part
-   real u_ag_mns(0:nnx,0:nny,nz), v_ag_mns(0:nnx,0:nny,nz) !also need complex part
+   real u_ag_p(0:nnx,0:nny,2), v_ag_p(0:nnx,0:nny,2) !two BC-AG modes: also need complex part
    real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz), zeta_G(0:nnx,0:nny,nz)
    real eta_ag(0:nnx,0:nny), eta_qg(0:nnx,0:nny)
-   real eta_ag_pls(0:nnx,0:nny), eta_ag_mns(0:nnx,0:nny)
+   real eta_ag_p(0:nnx,0:nny,2)
    real Psurf(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
    real div(0:nnx,0:nny), zeta(0:nnx,0:nny)
    real B(0:nnx,0:nny), B_nl(0:nnx,0:nny)
@@ -62,7 +61,7 @@ program main
    real pressure(0:nnx,0:nny), thickness(0:nnx,0:nny)
    real forcing_qg(0:nnx,0:nny), forcing_ag(0:nnx,0:nny)
    real forcing_total(0:nnx,0:nny)
-   real tmp(0:10), array(0:nnx,0:nny)
+   real tmp(0:10), array(0:nnx,0:nny), array1(0:nnx,0:nny), array2(0:nnx,0:nny)
    real q(0:nnx,0:nny,nz), psi(0:nnx,0:nny,nz)
    real qmode(0:nnx,0:nny,nz), psimode(0:nnx,0:nny,nz)
    real u_out(1:(nx/subsmprto),1:(ny/subsmprto),nz)
@@ -89,14 +88,17 @@ program main
    real*4 kex1_spec_tb(0:nx/2,1:ntsrow),key1_spec_tb(0:ny/2,1:ntsrow),tstime(1:ntsrow)
    real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
    real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
-   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,u_gfft,v_gfft
-   double complex,dimension(nx/2+1,ny,nz) :: u_agfft,u_agfft_pls,u_agfft_mns
-   double complex,dimension(nx/2+1,ny,nz) :: v_agfft,v_agfft_pls,v_agfft_mns
-   double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
-   double complex,dimension(nx/2+1,ny) :: eta_agfft,eta_agfft_pls,eta_agfft_mns
-   double complex,dimension(nx/2+1,ny) :: div_fft,div_fft_pls,div_fft_mns
-
-   integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
+   double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
+   double complex,dimension(nx/2+1,ny) :: etafft,div_fft
+   double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_gfft,v_gfft
+   double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc
+   double complex,dimension(nx/2+1,ny) :: eta_agfft,ftotalfft,fagfft
+   ! Poincare modes
+   double complex,dimension(nx/2+1,ny,2) :: u_agfft_p,v_agfft_p,eta_agfft_p,div_fft_p 
+   integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, imode, ntimes, inkrow
+   real sgn1,tmp2,tmp3
+   double complex,dimension(nx/2+1,ny) :: kappa_ijsq,M !kappa**2 at (i,j) 
+   real,dimension(nx/2+1,ny,2) :: omega_p ! Poincaire plus and minus
    !subsampling arrays
    integer,allocatable:: isubx(:),isuby(:),iftsubkl(:,:)
    integer rdsubk,rdsubl !temporary variables for reading (k,l) pair 
@@ -113,6 +115,7 @@ program main
    character(88) string6, string7, string8, string9, string10
    character(88) string6i, string7i, string8i, string9i, string10i
    character(88) string11, string12, string13, string14, string15
+   character(88) string11i, string12i, string13i, string14i, string15i
    character(88) string16, string17, string18, string19, string20
    character(88) string21, string22, string23, string24, string25
    ! random number
@@ -383,7 +386,7 @@ program main
             include 'subs/div_vort.f90' ! get div and zeta
             !  include 'subs/tmp_complex.f90'
             !  include 'subs/calc_q.f90'
-            include 'subs/diags.f90' ! get G-AG field
+            include 'subs/diags.f90' ! get AG field (layerwise)
 
 
             ! FFT for spectrum
@@ -401,9 +404,51 @@ program main
             ! 1. eta_A and div in FFT space
             datr(:,:) = eta_ag(1:nx,1:ny)
             include 'fftw_stuff/spec1.f90'
-            for_to_spec = for_to_spec + spectrum
-            eta_agfft=datc
+            eta_agfft(:,:)=datc ! BC mode
 
+            datr(:,:) = div2(1:nx,1:ny)-div1(1:nx,1:ny)
+            include 'fftw_stuff/spec1.f90'
+            div_fft(:,:)=datc ! BC mode
+
+            ! for each k,l pair, calculate M, then eta_+ and eta_-
+            ! In polarization relations, (2*pi) in FT is vanished
+            kappa_ijsq=nkx**2+nky**2 !nkx,nky defined in fft_params.f90
+            M=eye*sqrt(c_bc**2*kappa_ijsq+f0**2)*gprime(2)/c_bc**2 !only bc mode
+            ! two AG frequencies omega_+ and omega_- (BC only for rigid lid)
+            do imode = 1,2
+                sgn1=-(-1.)**imode; ! sgn1=1 when imode ==1, sgn1=-1 when imode==2
+                omega_p(:,:,imode)=sgn1*sqrt(c_bc**2*kappa_ijsq+f0**2)
+                eta_agfft_p(:,:,imode)=1/(2*M)*(M*eta_agfft+sgn1*div_fft)
+                u_agfft_p(:,:,imode)=gprime(2)*eta_agfft(:,:)*(omega_p(:,:,imode)*nkx+eye*f0*nky)&
+                  /(c_bc**2*kappa_ijsq)
+                v_agfft_p(:,:,imode)=gprime(2)*eta_agfft(:,:)*(omega_p(:,:,imode)*nky-eye*f0*nkx)&
+                  /(c_bc**2*kappa_ijsq)
+                ! inverse FFT to physical space
+                call dfftw_execute_dft_c2r(pc2r,u_agfft_p(:,:,imode),u_ag_p(1:nx,1:ny,imode))
+                call dfftw_execute_dft_c2r(pc2r,v_agfft_p(:,:,imode),v_ag_p(1:nx,1:ny,imode))
+                call dfftw_execute_dft_c2r(pc2r,eta_agfft_p(:,:,imode),eta_ag_p(1:nx,1:ny,imode))            
+               
+                ! interpolate u_ag_p and v_ag_p to corresponding coordinates
+                ! eta-grid to v-grid (upward, dirx=0,diry=1)
+                call interp_matrix(u_ag_p(:,:,imode),u_ag_p(:,:,imode),-1,0,10)
+                ! eta-grid to v-grid (downard, dirx=0,diry=-1)
+                call interp_matrix(v_ag_p(:,:,imode),v_ag_p(:,:,imode),0,-1,10)
+               !  array1=v_ag_p(:,:,imode)
+               !  array2=0.
+               !  do ii = 1,10
+               !  ! interpolated v from eta-grid to v-grid (going downward)
+               !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,0:ny-1))
+               !  array2=array2+array
+               !  ! inferred v at eta-grid from v-grid (going upward)
+               !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,2:ny+1))
+               !  ! get the residual
+               !  array1 = v_ag_p(:,:,imode) - array
+               !  end do 
+               !  v_ag_p(:,:,imode) = array2
+            end do ! imode
+
+            ! Boundary condition
+            
             ! Write 2-D FFT fields
             if(save2dfft) then
                iftcount=iftcount+1            
@@ -502,6 +547,43 @@ program main
    print*, 'Snapshot restarting index saved at',icount+icount_srt
    print*, 'Amp_matrix at the end of the previous simulation is saved',amp_save
 end program main
+
+subroutine interp_matrix(matin,matout,dirx,diry,irrt)
+   use data_initial
+   real,dimension(0:nnx,0:nny),intent(in) :: matin
+   real,dimension(0:nnx,0:nny),intent(out) :: matout
+   integer,intent(in) :: irrt,dirx,diry
+   real array(0:nnx,0:nny),array1(0:nnx,0:nny),array2(0:nnx,0:nny)
+   integer ii,i,j,ip,jp
+   if (abs(dirx)<=1.and.abs(diry)<=1) then
+      array1=matin
+      array2=0.
+      do ii=1,irrt
+         if(dirx*diry.eq.0) then ! 1-D interpolate
+            array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1+dirx:nx+dirx,1+diry:ny+diry))
+            include 'subs/bndy.f90'
+            array2=array2+array
+            ! inferred v at eta-grid from v-grid (going upward)
+            array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1-dirx:nx-dirx,1-diry:ny-diry))
+            include 'subs/bndy.f90'
+         elseif (dirx*diry.ne.0) then
+            array(1:nx,1:ny)= 0.25*(array1(1:nx,1:ny)+array1(1+dirx:nx+dirx,1:ny)+ &
+            &              array1(1:nx,1+diry:ny+diry)+array1(1+dirx:nx+dirx,1+diry:ny+diry))
+            include 'subs/bndy.f90'
+            array2=array2+array
+            array(1:nx,1:ny)= 0.25*(array1(1:nx,1:ny)+array1(1-dirx:nx-dirx,1:ny)+ &
+            &              array1(1:nx,1-diry:ny-diry)+array1(1-dirx:nx-dirx,1-diry:ny-diry))
+            include 'subs/bndy.f90'
+         end if 
+         ! get the residual
+         array1 = matin - array
+      end do
+   else
+      write(*,*) 'Interpolation is set wrong'
+   end if
+   matout=array2
+   
+end subroutine
 
 
 subroutine OU_Euler(amp1,amp2,c1,c2,c3)
