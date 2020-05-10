@@ -90,9 +90,9 @@ program main
    real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
    double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
    double complex,dimension(nx/2+1,ny) :: etafft,div_fft
-   double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_gfft,v_gfft
+   double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_qgfft,v_qgfft
    double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc
-   double complex,dimension(nx/2+1,ny) :: eta_agfft,ftotalfft,fagfft
+   double complex,dimension(nx/2+1,ny) :: eta_agfft,eta_qgfft,ftotalfft,fagfft
    ! Poincare modes
    double complex,dimension(nx/2+1,ny,2) :: u_agfft_p,v_agfft_p,eta_agfft_p,div_fft_p 
    integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, imode, ntimes, inkrow

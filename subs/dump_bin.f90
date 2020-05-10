@@ -26,7 +26,10 @@
 !  string17 = 'data/eta_qg'  // '_' // trim(which)
 !  string18 = 'data/eta_ag'  // '_' // trim(which)
 !  string19 = 'data/div_ek'  // '_' // trim(which)
-   string20 = 'data/zeta_Gf0' // '_' // trim(which)
+   string20 = 'data/zeta_G' // '_' // trim(which)
+   string21 = 'data/u_ag_p' // '_' // trim(which) 
+   string22 = 'data/v_ag_p' // '_' // trim(which)
+   string23 = 'data/et_ag_p' // '_' // trim(which)
 
 ! Note indices for (u,v,eta ...) starting with 0, useful part is 1:256
   !  real u_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz), v_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
@@ -112,15 +115,15 @@
 !  write(25,REC=1) taux(:,:)
 !  close(25)
 
-!   open(unit=26,file=string13,access='DIRECT',&
-!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-!   write(26,REC=1) u_qg(:,:,:)
-!   close(26)
+  open(unit=26,file=string13,access='DIRECT',&
+       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
+  write(26,REC=1) (((u_qg(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(26)
 
-!   open(unit=27,file=string14,access='DIRECT',&
-!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-!   write(27,REC=1) u_ag(:,:,:)
-!   close(27)
+  open(unit=27,file=string14,access='DIRECT',&
+       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
+  write(27,REC=1) (((u_ag(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(27)
 
 !   open(unit=28,file=string15,access='DIRECT',&
 !        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
@@ -149,6 +152,16 @@
 
   open(unit=33,file=string20,access='DIRECT',&
   & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-  write(33,REC=1) (((zeta_G(i,j,k)/f0,i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  write(33,REC=1) (((zeta_G(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
   close(33)
 
+
+  open(unit=34,file=string21,access='DIRECT',&
+  & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+  write(34,REC=1) (((u_ag_p(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(34)
+
+  open(unit=35,file=string22,access='DIRECT',&
+  & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+  write(35,REC=1) (((v_ag_p(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(35)
