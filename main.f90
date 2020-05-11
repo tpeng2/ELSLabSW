@@ -10,7 +10,7 @@ module data_initial
    integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
    integer ftsubsmprto,forcingtype
    logical ifrestart, use_ramp, ifsteady
-   logical calc1Dspec,save_movie,save2dfft
+   logical calc1Dspec,save_movie,save2dfft,save_gnuplt
    real c_theta,c_mu,c_sigma ! ---   O-U process (Euler method)
    integer iou_method
    include 'parameters.f90'
@@ -464,7 +464,7 @@ program main
                icount = icount + 1
                print*, 'writing data No.', icount
                include 'subs/dump_bin.f90' !output binary files
-               include 'subs/dump_gnu1a.f90' !output gnuplot files
+               if(save_gnuplt) include 'subs/dump_gnu1a.f90' !output gnuplot files
             endif
          endif
       endif

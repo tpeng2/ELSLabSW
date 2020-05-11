@@ -69,14 +69,7 @@
           endif
        enddo
        open(unit=22,file='taux_steady.dat',access='sequential',form='formatted',action='write')
-       ! Output forcing field
-       write(fmtstr,"(I6)") nx
-       fmtstr='('//trim(fmtstr)//'e15.6)'
-       do j = 0,ny+1
-          write(22,fmtstr) taux_steady(:,j)
-          write(*,*) '(1,j),forcing',j,taux_steady(1,j)
-       enddo
-       close (22)
+       
        array = taux_steady
        include 'subs/bndy.f90'
        taux_steady = array
@@ -85,6 +78,16 @@
        array = taux_var
        include 'subs/bndy.f90'
        taux_var = array
+
+       ! Output forcing field
+       write(fmtstr,"(I6)") nx
+       fmtstr='('//trim(fmtstr)//'e15.6)'
+       do j = 0,ny+1
+          write(22,fmtstr) taux_steady(:,j)
+          write(*,*) '(1,j),forcing',j,taux_steady(1,j)
+       enddo
+       close (22)
+       
 
 !   --- Restart
        icount = 0 !for  output file index

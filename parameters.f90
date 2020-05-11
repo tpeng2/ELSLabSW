@@ -37,18 +37,18 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 300., totaltime = 86400 * ndays )
+  parameter ( ndays= 1200., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=16 )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
-  parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
+  parameter ( iout = nsteps/ndays/(fileperday/2), i_diags = ifix(86400./16/dt))
  
   parameter (itape=86400*10/dt,ispechst=nsteps/ndays/fileperday) !spectrum output file, output one spectra per ispechst
 
   parameter(save2dfft=.true.,calc1Dspec=.false. )
 
-  parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
+  parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true., save_gnuplt=.false. )
 
   parameter ( ifsteady = .true., forcingtype=1) 
   ! forcingtype =0, taux=const in y , =1 cos(y)
