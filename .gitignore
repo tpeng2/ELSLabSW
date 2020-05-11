@@ -1,4 +1,15 @@
 *.mod
 build
 exec
-test
+test*
+hek*
+run*
+recycle
+params_in.f90
+parameters.f90
+*/data/
+*/specdata/
+*/fort.*
+*/*.txt
+*/exec
+*.vscode
