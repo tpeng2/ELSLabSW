@@ -49,16 +49,16 @@
          enddo
          amp_matrix(:) = 2.0*amp_matrix(:)
          write(*,*) 'amp_matrix file is read'
+         close(99)
       else if(iou_method==1) then
          write(*,*)'iou_method=1, generate Amp_matrix array before simulation'
          do itt = 1, nsteps
-            time = (itt-1)*dt
+            time_tmp = (itt-1)*dt
             amp_forcing = 0.
-            amp_forcing=sum(A_n*sin(omega*time+phi))
+            amp_forcing=sum(A_n*sin(omega*time_tmp+phi))
             amp_matrix(itt)=amp_forcing
             rms_amp = rms_amp + amp_forcing**2
          enddo
-         close(20)
          rms_amp = rms_amp/nsteps
          rms_amp = sqrt(rms_amp)
          ampfactor = c_sigma/rms_amp
@@ -66,11 +66,12 @@
          write(*,*) 'amp_matrix is devided by c_sigma/rms_amp',c_sigma/rms_amp,'and with a scaling factor',2.0
          open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
          do itt = 1, nsteps
-            write(20,'(2e15.6)') time/86400, amp_matrix(itt)
+            write(20,'(2e15.6)') time_tmp/86400, amp_matrix(itt)
          enddo
+         close (20)
          write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
-         ! call get_tau_amp_AR(time,amp_matrix(its))
-         write(*,*) 'time, read first forcing step', time, amp_matrix(its)
+         ! call get_tau_amp_AR(time_tmp,amp_matrix(its))
+         write(*,*) 'time_tmp, read first forcing step', time_tmp, amp_matrix(its)
       else if(iou_method==2) then
          write(*,*)'iou_method=2, Euler-method for stochastic Lagevin equation'
          ! the first step

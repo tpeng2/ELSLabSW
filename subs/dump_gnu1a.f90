@@ -1,6 +1,6 @@
 
        WRITE(which,'(I6)') 100000 + ignucount
-       string1 = 'data/wek'  // '_' // which(1:3)
+       string1 = 'data/wek'  // '_' // which(1:6)
        open(11, file = string1, status = 'unknown')
 
 

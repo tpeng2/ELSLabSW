@@ -51,7 +51,7 @@
   
    open(unit=15,file=string2,access='DIRECT',&
         & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
-        write(15,REC=1) (((v_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+   write(15,REC=1) (((v_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
    close(15)
   
   open(unit=16,file=string3,access='DIRECT',&
@@ -116,12 +116,12 @@
 !  close(25)
 
   open(unit=26,file=string13,access='DIRECT',&
-       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
+       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
   write(26,REC=1) (((u_qg(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
   close(26)
 
   open(unit=27,file=string14,access='DIRECT',&
-       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
+       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
   write(27,REC=1) (((u_ag(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
   close(27)
 

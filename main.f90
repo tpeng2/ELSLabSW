@@ -10,7 +10,7 @@ module data_initial
    integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
    integer ftsubsmprto,forcingtype
    logical ifrestart, use_ramp, ifsteady
-   logical calc1Dspec,save_movie,save2dfft
+   logical calc1Dspec,save_movie,save2dfft,save_gnuplt
    real c_theta,c_mu,c_sigma ! ---   O-U process (Euler method)
    integer iou_method
    include 'parameters.f90'
@@ -72,7 +72,7 @@ program main
    real gprime(nz), Htot, H(nz)
    real top(nz), bot(nz), Fmode(nz)
    real pdf(-100:100)
-   real x, y, z, ramp, ramp0, time, today
+   real x, y, z, ramp, ramp0, time, time_tmp, today
    real Lrossby
    real amp_matrix(nsteps+1),amp_save,amp_load !nsteps+1 days
    real,allocatable:: amp_matrix_rand(:)
@@ -118,6 +118,7 @@ program main
    character(88) string11i, string12i, string13i, string14i, string15i
    character(88) string16, string17, string18, string19, string20
    character(88) string21, string22, string23, string24, string25
+   character(88) string99,string98,fmtstr,fmtstr1
    ! random number
    real ran1,ran2,ranf,gasdev
    ! Initialize FFT
@@ -224,7 +225,8 @@ program main
    eta(:,:,:,2) = eta(:,:,:,1) + dt*rhs_eta(:,:,:)
    Uek(:,:,2) = Uek(:,:,1) + dt*rhs_Uek(:,:)
    Vek(:,:,2) = Vek(:,:,1) + dt*rhs_Vek(:,:)
-   time = dt
+   time = time + dt
+   
    its = its + 1
    if(ifsteady==.false. .and. iou_method==2) then
       call OU_Euler(amp_matrix(its-1),amp_matrix(its),c_theta,c_mu,c_sigma)
@@ -318,7 +320,7 @@ program main
       eta(:,:,:,3) = eta(:,:,:,1) + 2.*dt*rhs_eta(:,:,:)
       Uek(:,:,3) = Uek(:,:,1) + 2*dt * rhs_Uek(:,:)
       Vek(:,:,3) = Vek(:,:,1) + 2*dt * rhs_Vek(:,:)
-      time = its*dt
+      time = time + dt
       today=time/86400
       ! call get_tau_amp_AR(time,amp_matrix(its+1))
       if(ifsteady==.false. .and. iou_method==2) then
@@ -373,7 +375,8 @@ program main
       enddo
       enddo
 
-      write(300,'(i6,2f12.4,2e12.4)'),its, time/86400., amp_matrix(its), ke1/nx/ny, ke2/nx/ny
+      write(300,'(i6,4f12.4,2e12.4)'),its, time/86400., amp_matrix(its), u(nx/2,ny/2,1,1),&
+      div_ek(nx/2,nx/2),ke1/nx/ny, ke2/nx/ny
       call flush(300)
 
       if(nsteps.lt.start_movie.and.save_movie) then
@@ -461,7 +464,7 @@ program main
                icount = icount + 1
                print*, 'writing data No.', icount
                include 'subs/dump_bin.f90' !output binary files
-               include 'subs/dump_gnu1a.f90' !output gnuplot files
+               if(save_gnuplt) include 'subs/dump_gnu1a.f90' !output gnuplot files
             endif
          endif
       endif
