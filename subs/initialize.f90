@@ -56,7 +56,7 @@
   ! --- Wind Stress 
 
        f(:) = f0
-
+       taux_steady=0.0;
        do j = 1,ny
           y = -Ly/2. + (j-1)*dy
           if(forcingtype.eq.0) then
@@ -68,6 +68,15 @@
             +1.0/3.0*cos(twopi*y/Ly*4.0)+1.0/3.0*cos(twopi*y/Ly*8.0))
           endif
        enddo
+       open(unit=22,file='taux_steady.dat',access='sequential',form='formatted',action='write')
+       ! Output forcing field
+       write(fmtstr,"(I6)") nx
+       fmtstr='('//trim(fmtstr)//'e15.6)'
+       do j = 0,ny+1
+          write(22,fmtstr) taux_steady(:,j)
+          write(*,*) '(1,j),forcing',j,taux_steady(1,j)
+       enddo
+       close (22)
        array = taux_steady
        include 'subs/bndy.f90'
        taux_steady = array
@@ -84,7 +93,7 @@
        if ( ifrestart .eqv. .false. ) then
          time = 0.  !in second
          restart_from=time
-         print*,'Restart from',restart_from, 'day','icount,iftcount',icount,iftcount
+         print*,'New case from',restart_from, 'day','icount,iftcount',icount,iftcount
          ! forcing
          amp_load=0.0
          amp_save=0.0
@@ -105,7 +114,7 @@
        include 'subs/bndy.f90'
        eta(:,:,1,1) = array
 
-       else !if restart
+       else !if ifrestart
           open(0,file='restart')
           do j = 0,nny
           do i = 0,nnx
@@ -116,15 +125,17 @@
           enddo
           read(0,*) icount_srt,time,nspecfile,iftcount_srt
           close(0)
-          ! Read forcing data
-          open(1,file='restart_amp')
-          read(1,*) amp_save,amp_load ! inverse order when saving these 
-          close(1)
+          if(ifsteady.eqv..false..and.iou_method.eq.1) then
+            ! Read forcing data !Only when iou_method == 2
+            open(1,file='restart_amp')
+            read(1,*) amp_save,amp_load ! inverse order when saving these 
+            close(1)
+            print*, 'Amp_matrix at the end of the previous simulation is loaded',amp_load
+         end if
          restart_from=time/86400
          print*, 'Restart from', restart_from, 'day'
          print*, 'FFT index begins with',iftcount_srt
          print*, 'snapshot index begins with',icount_srt
-         print*, 'Amp_matrix at the end of the previous simulation is loaded',amp_load
 
 !         if (restart_from == 999 ) then
 !            time = 0

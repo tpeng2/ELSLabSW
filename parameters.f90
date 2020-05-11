@@ -37,7 +37,7 @@
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1000., totaltime = 86400 * ndays )
+  parameter ( ndays= 300., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=16 )
 
@@ -50,7 +50,7 @@
 
   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
 
-  parameter ( ifsteady = .false., forcingtype=2) 
+  parameter ( ifsteady = .true., forcingtype=1) 
   ! forcingtype =0, taux=const in y , =1 cos(y)
 
   parameter ( ifrestart = .true. , use_ramp = .false. )
