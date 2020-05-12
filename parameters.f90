@@ -29,15 +29,15 @@
 
   parameter ( rf = 0.001 )
 
-  parameter ( c_bc = 2. )
+  parameter ( c_bc = 2 )
 
-  parameter ( hek = 50.)   
+  parameter ( hek = 50.0e8 )   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1500., totaltime = 86400 * ndays )
+  parameter ( ndays= 1600., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 
