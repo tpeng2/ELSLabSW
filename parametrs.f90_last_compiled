@@ -29,15 +29,15 @@
 
   parameter ( rf = 0.001 )
 
-  parameter ( c_bc = 2. )
+  parameter ( c_bc = 2.0 )
 
-  parameter ( hek = 50.)   
+  parameter ( hek = 50.0e8 )   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1200., totaltime = 86400 * ndays )
+  parameter ( ndays= 1000., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 
@@ -52,6 +52,6 @@
 
   parameter ( ifsteady = .true., forcingtype=1) ! forcingtype =1, sine wave, =2 O-U process (AR1)
 
-  parameter ( restart = .true. , use_ramp = .false. )
+  parameter ( restart = .false. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 

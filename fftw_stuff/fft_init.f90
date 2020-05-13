@@ -1,6 +1,4 @@
-
-    INCLUDE '/usr/local/include/fftw3.f'
-
+    include 'fftw_stuff/fftw3.f'
 
     datr = 0; datc = 0
     CALL dfftw_plan_dft_r2c_2d(pr2c,Nx,Ny,datr,datc,FFTW_ESTIMATE)

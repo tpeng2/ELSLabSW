@@ -1,4 +1,6 @@
       module data_initial
+      integer exec_loc
+      character(88) fftw_loc
       integer nx, ny, nz, nnx, nny
       integer i_diags
       double precision pi, twopi, Lx, Ly, dx, dy

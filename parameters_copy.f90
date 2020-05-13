@@ -1,7 +1,7 @@
 
 
  ! --- Misc ---
-
+  parameter ( exec_loc=0) ! 0 ==> oxygen, 1==>local mac, use for setting FFTw3 lib
   parameter ( pi = 2.*asin(1.), twopi = 2.*pi )
 
  ! ---  Grid ---
@@ -25,21 +25,21 @@
 
   parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
 
-  parameter ( Ah = 1.e-5*dx**4 )
+  parameter ( Ah = 0.05e-5*dx**4 )
 
   parameter ( rf = 0.001 )
 
   parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.e8)   
+  parameter ( hek = 50.)   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 200., totaltime = 86400 * ndays )
+  parameter ( ndays= 1200., totaltime = 86400 * ndays )
 
-  parameter ( nsteps = totaltime/dt,fileperday=16 )
+  parameter ( nsteps = totaltime/dt,fileperday=12 )
 
 ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
   parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
@@ -50,8 +50,8 @@
 
   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
 
-  parameter ( ifsteady = .true. )
+  parameter ( ifsteady = .true., forcingtype=1) ! forcingtype =1, sine wave, =2 O-U process (AR1)
 
-  parameter ( restart = .false. , use_ramp = .false. )
+  parameter ( restart = .true. , use_ramp = .false. )
 !  parameter ( restart = .false. , use_ramp = .false. )
 
