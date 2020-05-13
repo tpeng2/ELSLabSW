@@ -25,19 +25,19 @@
 
   parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
 
-  parameter ( Ah = 1.e-5*dx**4 )
+  parameter ( Ah = 0.05e-5*dx**4 )
 
   parameter ( rf = 0.001 )
 
-  parameter ( c_bc = 2 )
+  parameter ( c_bc = 2. )
 
-  parameter ( hek = 50.0e8 )   
+  parameter ( hek = 50.)   
 
  ! ---  Time ---
 
   parameter ( dt = 300. )
  
-  parameter ( ndays= 1600., totaltime = 86400 * ndays )
+  parameter ( ndays= 1200., totaltime = 86400 * ndays )
 
   parameter ( nsteps = totaltime/dt,fileperday=12 )
 

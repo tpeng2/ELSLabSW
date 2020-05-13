@@ -35,7 +35,7 @@
       real div1(0:nnx,0:nny), zeta1(0:nnx,0:nny)
       real div2(0:nnx,0:nny), zeta2(0:nnx,0:nny)
       real div_ek(0:nnx,0:nny), zeta_ek(0:nnx,0:nny) 
-      real div_ek_qg(0:nnx,0:nny)
+      real div_ek_qg(0:nnx,0:nny),zeta_G(0:nnx,0:nny,nz)
       real grad2u(0:nnx,0:nny), grad4u(0:nnx,0:nny)
       real grad2v(0:nnx,0:nny), grad4v(0:nnx,0:nny)
       real dissi_u(0:nnx,0:nny), dissi_v(0:nnx,0:nny)
