@@ -10,9 +10,10 @@
       real ndays,totaltime,dt
       real restart_from
       integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
-      integer ftsubsmprto,forcingtype
+      integer ftsubsmprto,forcingtype, iou_method
       logical restart, use_ramp, ifsteady
       logical calc1Dspec,save_movie,save2dfft
+      real c_theta, c_mu, c_sigma
       include 'parameters.f90'
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
       !random number
@@ -69,7 +70,9 @@
       real pdf(-100:100)
       real x, y, z, ramp, ramp0, time, today
       real Lrossby
-      real amp_matrix(864000) !3000 days
+      ! real amp_matrix(864000) !3000 days
+      real amp_matrix(nsteps+1),time_tmp(nsteps+1),amp_save,amp_load !nsteps+1 days
+      real,allocatable:: amp_matrix_rand(:)
       real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
       real*4 tmp_out(10)
 
@@ -130,18 +133,7 @@
       write(*,*) 'Spectrum time series has', ntsrow, 'lines'
       write(*,*) 'dx = ', dx
 
-      if ( ifsteady .eqv. .true. ) then
-         amp_matrix(:) = 0.
-      elseif ( ifsteady .eqv. .false. ) then
-         open(99, file = 'amp_matrix')
-         write(*,*) 'amp_matrix file is opened'
-         do it = 1,864000
-            read(99,*) amp_matrix(it)
-            if (mod(it,2001)==1) write(*,*) 'Reading Amp_matrix',it,'th step'
-         enddo
-         amp_matrix(:) = 2.0*amp_matrix(:)
-         write(*,*) 'amp_matrix file is read'
-      endif
+      include 'subs/initialize_forcing.f90'
 
       !! --- Initialization !!
       include 'subs/initialize.f90'
@@ -149,12 +141,12 @@
       itlocal=1
       if(restart==.false.)   nspecfile=0
       write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
-      !forcing
-      Fws=20 !sampling extension (beyond f0)
-      f_thrhld=0.2*f0
-      n_omega=Fws*ndays !20 per day to construct the curve
-      allocate(omega(n_omega),A_n(n_omega),phi(n_omgea))
-      delta_omega=2*pi/86400./ndays
+      ! !forcing
+      ! Fws=20 !sampling extension (beyond f0)
+      ! f_thrhld=0.2*f0
+      ! n_omega=Fws*ndays !20 per day to construct the curve
+      ! allocate(omega(n_omega),A_n(n_omega),phi(n_omgea))
+      ! delta_omega=2*pi/86400./ndays
       ! !construct Amp frequency curve
       ! do i = 1, n_omega !1e*5
       !    omega(i) = i*delta_omega
@@ -169,7 +161,9 @@
       ! enddo
       ! write(*,*) 'Amp frequency chart is constructed'
       !apply amp_matrix
-      taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
+      ! forcing type
+      ! call subroutine get_taux(taux_steady_in,amp_in,taux_out)
+      call get_taux(taux_steady,amp_matrix(its),taux)
 
       !==============================================================
       !
@@ -229,7 +223,7 @@
       Vek(:,:,2) = Vek(:,:,1) + dt*rhs_Vek(:,:)
       time = dt
       its = its + 1
-      taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its))
+      call get_taux(taux_steady,amp_matrix(its),taux)
 
       !
       !     need to correct u,v for surface pressure 
@@ -318,9 +312,9 @@
          eta(:,:,:,3) = eta(:,:,:,1) + 2.*dt*rhs_eta(:,:,:)
          Uek(:,:,3) = Uek(:,:,1) + 2*dt * rhs_Uek(:,:)
          Vek(:,:,3) = Vek(:,:,1) + 2*dt * rhs_Vek(:,:)
-         time = its*dt
+         time = time + dt
          today=time/86400
-         taux(:,:) = taux_steady(:,:)*(1+amp_matrix(its+1))
+         call get_taux(taux_steady,amp_matrix(its),taux)
 
          !
          !     stuff for surface pressure correction
@@ -369,7 +363,7 @@
          enddo
          enddo
 
-         write(300,*),its, time/86400., ke1/nx/ny, ke2/nx/ny
+         write(300,'(i6,2f12.4,2e12.4)'),its, time/86400.,taux(nx/2,ny/2), ke1/nx/ny, ke2/nx/ny
          call flush(300)
 
          if(nsteps.lt.start_movie.and.save_movie) then
@@ -716,3 +710,15 @@ FUNCTION gasdev(idum)
    endif
    return 
    END FUNCTION gasdev
+
+   subroutine get_taux(taux_steady_in,amp_in,taux_out)
+      use data_initial
+      implicit none
+      real,intent(in):: taux_steady_in(0:nnx,0:nny),amp_in
+      real,intent(out)::taux_out(0:nnx,0:nny)
+      if (forcingtype==0) then
+         taux_out(:,:) = taux_steady_in(:,:) + sqrt(tau0)*amp_in
+      elseif(forcingtype==1) then
+         taux_out(:,:) = taux_steady_in(:,:)*(1.+amp_in)
+      endif
+   end subroutine

@@ -1,8 +1,9 @@
 #!/bin/bash
 #read -p "Enter case folder name:  " ${case}
 case=$1
-read -p "!! Enter machin: 0) Oxygen or 1) for local mac:" ${pcid}
-if [ $pcid -eq  0  ]
+read -p "!! Enter machin: 0) Oxygen or 1) for local mac:" pcid
+#read pcid
+if [ "${pcid}" = "0" ]
 	then 
 	    machine_name=Oxygen
 	    fftw_path=/usr/include
@@ -12,9 +13,10 @@ if [ $pcid -eq  0  ]
 	    fftw_path=/usr/local/include
 	    data_path=/Volumes/scratch/
 fi
+echo "!! ${pcid} was selected"
 echo "!! Using setting for ${machine_name} with fftw stored at ${fftw_path}"
 cp "${data_path}${case}/parameters.f90" .
 echo "!! Paramter file copied from ${data_path} to current folder"
 ifort -O3 -o  ./$case/exec main.f90  -L$fftw_path -lfftw3 
-mv ./parameters.f90 ./parametrs.f90_last_compiled
+mv ./parameters.f90 ./parameters.f90_last_compiled
 echo "!! Compilation of $case completed on the computer $machine_name "
