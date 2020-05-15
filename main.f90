@@ -22,12 +22,15 @@
       real delta_omega,f_thrhld
       integer n_omega,Fws
       real,allocatable :: omega(:),A_n(:),phi(:)
+      !for complex number i
+      double complex eye
+
+
       end module data_initial
 
       program main
 
       use data_initial
-      ! random number
       real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
       real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
       real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
@@ -88,7 +91,7 @@
       real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
       real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
       double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
-      double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
+      double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft,div_fft
 
       double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_qgfft,v_qgfft
       double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc
@@ -96,12 +99,15 @@
 
       ! Poincare modes
       double complex,dimension(nx/2+1,ny,2) :: u_agfft_p,v_agfft_p,eta_agfft_p,div_fft_p 
-
-
-      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
+      real,dimension(nx/2+1,ny,2) :: omega_p ! omega field for poincaire plus and minus
+      real sgn1,tmp2,tmp3
+      double complex,dimension(nx/2+1,ny) :: kappa_ijsq,M !kappa**2 at (i,j) 
+      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, imode, ntimes, inkrow
+      
       !subsampling arrays
       integer,allocatable:: isubx(:),isuby(:),iftsubkl(:,:)
       integer rdsubk,rdsubl !temporary variables for reading (k,l) pair 
+      
       !subsampling size
       integer szsubx,szsuby,szftrdrow,szftrdcol
       !I/O info
@@ -122,6 +128,13 @@
 
       include 'fftw_stuff/fft_params.f90'
       include 'fftw_stuff/fft_init.f90'
+      ! === Complex number i
+      eye=(0.0,1.0)
+
+      ! === Set random number seeds
+      call date_and_time(VALUES=values)
+      iseed = -(values(8)+values(7)+values(6))
+
       ! === Allocate variables
       szsubx=ceiling(nx/(subsmprto+1e-15))
       szsuby=ceiling(ny/(subsmprto+1e-15))
@@ -252,8 +265,6 @@
          enddo
 
          include 'subs/IOheader.f90' 
-         call date_and_time(VALUES=values)
-         iseed = -(values(8)+values(7)+values(6))
       !==============================================================      
       !
       !      subsequent time steps
@@ -390,6 +401,7 @@
 
 
          if ( its .gt. start_movie ) then
+            ! Diognostic only when outputting physical or Fourier fields
             if(mod(its,ispechst).eq.0.or.mod(its,iout).eq.0) then 
                include 'subs/div_vort.f90'
                !  include 'subs/tmp_complex.f90'
@@ -553,6 +565,55 @@
                v_agfft_bc=v_agfft(:,:,2)-v_agfft(:,:,1)
                ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
                
+
+            ! AG+, AG- decomposition
+            ! 1. convert eta_A and div to FFT space
+               datr(:,:) = eta_ag(1:nx,1:ny)
+               include 'fftw_stuff/spec1.f90'
+               eta_agfft(:,:)=datc ! BC mode
+   
+               datr(:,:) = div2(1:nx,1:ny)-div1(1:nx,1:ny)
+               include 'fftw_stuff/spec1.f90'
+               div_fft(:,:)=datc ! BC mode
+   
+               ! for each k,l pair, calculate M, then eta_+ and eta_-
+               ! In polarization relations, (2*pi) in FT is vanished
+               kappa_ijsq=nkx**2+nky**2 !nkx,nky defined in fft_params.f90
+               M=eye*sqrt(c_bc**2*kappa_ijsq+f0**2)*gprime(2)/c_bc**2 !only bc mode
+               ! two AG frequencies omega_+ and omega_- (BC only for rigid lid)
+               do imode = 1,2
+                   sgn1=-(-1.)**imode; ! sgn1=1 when imode ==1, sgn1=-1 when imode==2
+                   omega_p(:,:,imode)=sgn1*sqrt(c_bc**2*kappa_ijsq+f0**2)
+                   eta_agfft_p(:,:,imode)=1/(2*M)*(M*eta_agfft+sgn1*div_fft)
+                   u_agfft_p(:,:,imode)=gprime(2)*eta_agfft(:,:)*(omega_p(:,:,imode)*nkx+eye*f0*nky)&
+                     /(c_bc**2*kappa_ijsq)
+                   v_agfft_p(:,:,imode)=gprime(2)*eta_agfft(:,:)*(omega_p(:,:,imode)*nky-eye*f0*nkx)&
+                     /(c_bc**2*kappa_ijsq)
+               !     ! inverse FFT to physical space
+               !     call dfftw_execute_dft_c2r(pc2r,u_agfft_p(:,:,imode),datr)
+               !     call dfftw_execute_dft_c2r(pc2r,v_agfft_p(:,:,imode),v_ag_p(1:nx,1:ny,imode))
+               !     call dfftw_execute_dft_c2r(pc2r,eta_agfft_p(:,:,imode),eta_ag_p(1:nx,1:ny,imode))            
+                  
+               !     ! interpolate u_ag_p and v_ag_p to corresponding coordinates
+               !     ! eta-grid to v-grid (upward, dirx=0,diry=1)
+               !     call interp_matrix(u_ag_p(:,:,imode),u_ag_p(:,:,imode),-1,0,10)
+               !     ! eta-grid to v-grid (downard, dirx=0,diry=-1)
+               !     call interp_matrix(v_ag_p(:,:,imode),v_ag_p(:,:,imode),0,-1,10)
+               !    !  array1=v_ag_p(:,:,imode)
+               !    !  array2=0.
+               !    !  do ii = 1,10
+               !    !  ! interpolated v from eta-grid to v-grid (going downward)
+               !    !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,0:ny-1))
+               !    !  array2=array2+array
+               !    !  ! inferred v at eta-grid from v-grid (going upward)
+               !    !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,2:ny+1))
+               !    !  ! get the residual
+               !    !  array1 = v_ag_p(:,:,imode) - array
+               !    !  end do 
+               !    !  v_ag_p(:,:,imode) = array2
+               end do ! imode
+               ! AG+-mode decomp finished
+
                ! Write 2-D FFT fields
                if(save2dfft) then
                   iftcount=iftcount+1
@@ -773,4 +834,41 @@ FUNCTION gasdev(idum)
       elseif(forcingtype==1) then
          taux_out(:,:) = taux_steady_in(:,:)*(1.+amp_in)
       endif
+   end subroutine
+
+   subroutine interp_matrix(matin,matout,dirx,diry,irrt)
+      use data_initial
+      real,dimension(0:nnx,0:nny),intent(in) :: matin
+      real,dimension(0:nnx,0:nny),intent(out) :: matout
+      integer,intent(in) :: irrt,dirx,diry
+      real array(0:nnx,0:nny),array1(0:nnx,0:nny),array2(0:nnx,0:nny)
+      integer ii,i,j,ip,jp
+      if (abs(dirx)<=1.and.abs(diry)<=1) then
+         array1=matin
+         array2=0.
+         do ii=1,irrt
+            if(dirx*diry.eq.0) then ! 1-D interpolate
+               array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1+dirx:nx+dirx,1+diry:ny+diry))
+               include 'subs/bndy.f90'
+               array2=array2+array
+               ! inferred v at eta-grid from v-grid (going upward)
+               array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1-dirx:nx-dirx,1-diry:ny-diry))
+               include 'subs/bndy.f90'
+            elseif (dirx*diry.ne.0) then
+               array(1:nx,1:ny)= 0.25*(array1(1:nx,1:ny)+array1(1+dirx:nx+dirx,1:ny)+ &
+               &              array1(1:nx,1+diry:ny+diry)+array1(1+dirx:nx+dirx,1+diry:ny+diry))
+               include 'subs/bndy.f90'
+               array2=array2+array
+               array(1:nx,1:ny)= 0.25*(array1(1:nx,1:ny)+array1(1-dirx:nx-dirx,1:ny)+ &
+               &              array1(1:nx,1-diry:ny-diry)+array1(1-dirx:nx-dirx,1-diry:ny-diry))
+               include 'subs/bndy.f90'
+            end if 
+            ! get the residual
+            array1 = matin - array
+         end do
+      else
+         write(*,*) 'Interpolation is set wrong'
+      end if
+      matout=array2
+      
    end subroutine
