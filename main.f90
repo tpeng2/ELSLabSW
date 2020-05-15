@@ -13,7 +13,7 @@
       integer ftsubsmprto,forcingtype, iou_method
       logical restart, use_ramp, ifsteady
       logical calc1Dspec,save_movie,save2dfft
-      real c_theta, c_mu, c_sigma
+      real c_theta, c_mu, c_sigma, c_tauvar
       include 'parameters.f90'
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
       !random number
@@ -31,14 +31,16 @@
       real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
       real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
       real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
+      real u_ag_p(0:nnx,0:nny,2), v_ag_p(0:nnx,0:nny,2) !two BC-AG modes: also need complex part
       real eta_ag(0:nnx,0:nny), eta_qg(0:nnx,0:nny)
+      real eta_ag_p(0:nnx,0:nny,2)
       real Psurf(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
       real div(0:nnx,0:nny), zeta(0:nnx,0:nny)
       real B(0:nnx,0:nny), B_nl(0:nnx,0:nny)
       real div1(0:nnx,0:nny), zeta1(0:nnx,0:nny)
       real div2(0:nnx,0:nny), zeta2(0:nnx,0:nny)
       real div_ek(0:nnx,0:nny), zeta_ek(0:nnx,0:nny) 
-      real div_ek_qg(0:nnx,0:nny),zeta_G(0:nnx,0:nny,nz)
+      real div_ek_qg(0:nnx,0:nny),zeta_G(0:nnx,0:nny,nz),zeta_AG(0:nnx,0:nny,nz)
       real grad2u(0:nnx,0:nny), grad4u(0:nnx,0:nny)
       real grad2v(0:nnx,0:nny), grad4v(0:nnx,0:nny)
       real dissi_u(0:nnx,0:nny), dissi_v(0:nnx,0:nny)
@@ -88,6 +90,14 @@
       double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
       double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft
 
+      double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_qgfft,v_qgfft
+      double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc
+      double complex,dimension(nx/2+1,ny) :: eta_agfft,eta_qgfft
+
+      ! Poincare modes
+      double complex,dimension(nx/2+1,ny,2) :: u_agfft_p,v_agfft_p,eta_agfft_p,div_fft_p 
+
+
       integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, ntimes, inkrow
       !subsampling arrays
       integer,allocatable:: isubx(:),isuby(:),iftsubkl(:,:)
@@ -103,8 +113,12 @@
       character(88) string1, string2, string3, string4, string5
       character(88) string1i, string2i, string3i, string4i, string5i
       character(88) string6, string7, string8, string9, string10
+      character(88) string6i, string7i, string8i, string9i, string10i
       character(88) string11, string12, string13, string14, string15
+      character(88) string11i, string12i, string13i, string14i, string15i
       character(88) string16, string17, string18, string19, string20
+      character(88) string21, string22, string23, string24, string25
+      character(88) string99,string98,fmtstr,fmtstr1
 
       include 'fftw_stuff/fft_params.f90'
       include 'fftw_stuff/fft_init.f90'
@@ -363,7 +377,7 @@
          enddo
          enddo
 
-         write(300,'(i6,2f12.4,2e12.4)'),its, time/86400.,taux(nx/2,ny/2), ke1/nx/ny, ke2/nx/ny
+         write(300,'(i6,1f12.4,3e12.4)'),its, time/86400.,taux(nx/2,ny/2), ke1/nx/ny, ke2/nx/ny
          call flush(300)
 
          if(nsteps.lt.start_movie.and.save_movie) then
@@ -373,19 +387,22 @@
             end if
          end if
 
+
+
          if ( its .gt. start_movie ) then
-            if ( mod(its,iout).eq.0 ) then  ! output 
+            if(mod(its,ispechst).eq.0.or.mod(its,iout).eq.0) then 
                include 'subs/div_vort.f90'
-      !                include 'subs/tmp_complex.f90'
-      !                include 'subs/calc_q.f90'
+               !  include 'subs/tmp_complex.f90'
+               !  include 'subs/calc_q.f90'
                include 'subs/diags.f90'
+            end if
+            
+            if ( mod(its,iout).eq.0 ) then  ! output 
                icount = icount + 1
                include 'subs/dump_bin.f90'
                print*, 'writing data No.', icount
-            endif
-         endif  !output
+            end if
 
-         if ( time.gt.0*86400. ) then
             if ( mod(its,ispechst).eq.0 ) then
                count_specs_1 = count_specs_1 + 1
                count_specs_2 = count_specs_2 + 1 
@@ -499,11 +516,46 @@
                include 'fftw_stuff/spec1.f90'
                ke_ek_spec =  ke_ek_spec + spectrum
 
-               iftcount=iftcount+1
+               datr(:,:) = u_ag(1:nx,1:ny,1)
+               include 'fftw_stuff/spec1.f90'
+               u_agfft(:,:,1)=datc        
+   
+               datr(:,:) = u_ag(1:nx,1:ny,2)
+               include 'fftw_stuff/spec1.f90'
+               u_agfft(:,:,2)=datc
+   
+               datr(:,:) = v_ag(1:nx,1:ny,1)
+               include 'fftw_stuff/spec1.f90'
+               v_agfft(:,:,1)=datc       
+   
+               datr(:,:) = v_ag(1:nx,1:ny,2)
+               include 'fftw_stuff/spec1.f90'
+               v_agfft(:,:,2)=datc
+   
+               datr(:,:) = u_qg(1:nx,1:ny,1)
+               include 'fftw_stuff/spec1.f90'
+               u_qgfft(:,:,1)=datc        
+   
+               datr(:,:) = u_qg(1:nx,1:ny,2)
+               include 'fftw_stuff/spec1.f90'
+               u_qgfft(:,:,2)=datc
+   
+               datr(:,:) = v_qg(1:nx,1:ny,1)
+               include 'fftw_stuff/spec1.f90'
+               v_qgfft(:,:,1)=datc       
+   
+               datr(:,:) = v_qg(1:nx,1:ny,2)
+               include 'fftw_stuff/spec1.f90'
+               v_qgfft(:,:,2)=datc
+   
+   
+               u_agfft_bc=u_agfft(:,:,2)-u_agfft(:,:,1)
+               v_agfft_bc=v_agfft(:,:,2)-v_agfft(:,:,1)
                ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
                
                ! Write 2-D FFT fields
                if(save2dfft) then
+                  iftcount=iftcount+1
                   include 'subs/dump_bin_spec2d.f90'
                endif !itsrow==ntsrow
             endif
@@ -717,7 +769,7 @@ FUNCTION gasdev(idum)
       real,intent(in):: taux_steady_in(0:nnx,0:nny),amp_in
       real,intent(out)::taux_out(0:nnx,0:nny)
       if (forcingtype==0) then
-         taux_out(:,:) = taux_steady_in(:,:) + sqrt(tau0)*amp_in
+         taux_out(:,:) = taux_steady_in(:,:) +  c_tauvar*sqrt(tau0)*amp_in
       elseif(forcingtype==1) then
          taux_out(:,:) = taux_steady_in(:,:)*(1.+amp_in)
       endif
