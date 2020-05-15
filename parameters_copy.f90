@@ -1,8 +1,7 @@
 
-
  ! --- Misc ---
 
-  parameter ( pi = 2.*asin(1.), twopi = 2.*pi )
+   parameter ( pi = 2.*asin(1.), twopi = 2.*pi )
 
   ! ---  Grid ---
  
@@ -23,7 +22,7 @@
  
    parameter ( r_drag = 1.e-7 )
  
-   parameter ( r_invLap = 1.e-7*twopi**2/Ly**2 )
+   parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
  
    parameter ( Ah = 1.e-5*dx**4 )
  
@@ -31,13 +30,13 @@
  
    parameter ( c_bc = 2.0 )
  
-   parameter ( hek = 50.0e8 )   
+   parameter ( hek = 50.0 )   
  
   ! ---  Time ---
  
    parameter ( dt = 300. )
   
-   parameter ( ndays= 800., totaltime = 86400 * ndays )
+   parameter ( ndays= 0600., totaltime = 86400 * ndays )
  
    parameter ( nsteps = totaltime/dt,fileperday=12 )
  
@@ -48,13 +47,14 @@
  
    parameter(save2dfft=.true.,calc1Dspec=.false. )
  
-   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
+   parameter ( start_movie = 1. , subsmprto=1, ftsubsmprto=2, save_movie=.true. )
  
-   parameter ( ifsteady = .true., forcingtype=0, iou_method=1) 
+   parameter ( ifsteady = .false., forcingtype=0, iou_method=1) 
    ! forcingtype =0, zero spatial mode tau0+amp_matrix =1 tau0*(1+amp_matrix)
    ! iou_method =0, read amp_matrix, =1,generate amp_matrix in the same way
  
    parameter ( restart = .true. , use_ramp = .false. )
  !  parameter ( restart = .false. , use_ramp = .false. )
  
- 
+   parameter ( c_theta=5.*f0, c_mu=0.,  c_sigma=0.1,c_tauvar=c_sigma)
+
