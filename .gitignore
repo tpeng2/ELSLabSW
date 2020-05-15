@@ -13,3 +13,5 @@ parameters.f90
 */*.txt
 */exec
 *.vscode
+parameters.f90_last_compiled
+case*

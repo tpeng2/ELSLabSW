@@ -1,0 +1,5 @@
+#!/bin/bash
+SEARCHSTR=$1
+SSPATH=${2:-.}
+egrep -n $SEARCHSTR  $SSPATH/subs/*.f90 $SSPATH/main.f90 $SSPATH/fftw_stuff/*.f90
+

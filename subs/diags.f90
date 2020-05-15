@@ -168,6 +168,36 @@
        array(:,:) = eta_ag(:,:)
        include 'subs/bndy.f90'
        eta_ag(:,:) = array(:,:)
+
+       do k=1,nz
+         uu=u_qg(:,:,k)
+         vv=v_qg(:,:,k)
+         ! zeta_G
+         do j = 1,ny
+            do i = 1,nx
+               zeta_G(i,j,k) =  (vv(i,j)-vv(i-1,j))/dx    &
+               &         -  (uu(i,j)-uu(i,j-1))/dy 
+            enddo ! i-loop
+         enddo ! j-koop
+         array = zeta_G(:,:,k)
+         include 'subs/bndy.f90'
+         zeta_G(:,:,k)= array
+       enddo ! k-loop
+       do k=1,nz
+         uu=u_ag(:,:,k)
+         vv=v_ag(:,:,k)
+         ! zeta_AG
+         do j = 1,ny
+            do i = 1,nx
+               zeta_AG(i,j,k) =  (vv(i,j)-vv(i-1,j))/dx    &
+               &         -  (uu(i,j)-uu(i,j-1))/dy 
+            enddo ! i-loop
+         enddo ! j-koop
+         array = zeta_AG(:,:,k)
+         include 'subs/bndy.f90'
+         zeta_AG(:,:,k)= array
+       enddo ! k-loop
+
 !     ke1 = 0.
 !     ke2 = 0.
 !     do j = 1, ny

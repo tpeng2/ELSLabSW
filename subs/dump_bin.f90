@@ -1,81 +1,65 @@
 
   eta(:,:,1,3) = Psurf(:,:)
-
-  WRITE(which,'(I5)') 10000 + icount
-   nbinstr=6 !check every time !Tianze  03/18/20
-   string1 = 'data/u_o'  // '_' // which(1:5)
-   string2 = 'data/v_o'  // '_' // which(1:5)
-   string3 = 'data/eta_o'  // '_' // which(1:5)
-   string4 = 'data/w_o'  // '_' // which(1:5)
-   string5 = 'data/Uek'  // '_' // which(1:5)
-   string6 = 'data/Vek'  // '_' // which(1:5)
-
-
-!  string5 = 'data/Vek'  // '_' // which(1:5)
-!  string6 = 'data/forci_qg'  // '_' // which(1:5)
-!  string7 = 'data/forci_ag'  // '_' // which(1:5)
-!  string8 = 'data/forci_to'  // '_' // which(1:5)
-!  string9 = 'data/dissi_u'  // '_' // which(1:5)
-!  string10 = 'data/dissi_v'  // '_' // which(1:5)
-!  string11 = 'data/q'  // '_' // which(1:5)
-!  string12 = 'data/taux'  // '_' // which(1:5)
-!  string13 = 'data/u_qg'  // '_' // which(1:5)
-!  string14 = 'data/u_ag'  // '_' // which(1:5)
-!  string15 = 'data/v_qg'  // '_' // which(1:5)
-!  string16 = 'data/v_ag'  // '_' // which(1:5)
-!  string17 = 'data/eta_qg'  // '_' // which(1:5)
-!  string18 = 'data/eta_ag'  // '_' // which(1:5)
-!  string19 = 'data/div_ek'  // '_' // which(1:5)
+  
+  WRITE(which,'(I6)') 100000 + icount
+  
+   string1 = 'data/u_o'  // '_' // trim(which)
+   string2 = 'data/v_o'  // '_' // trim(which)
+   string3 = 'data/eta_o'  // '_' // trim(which)
+   string4 = 'data/div_o'  // '_' // trim(which)
+!  string5 = 'data/Uek'  // '_' // trim(which)
+!  string6 = 'data/Vek'  // '_' // trim(which)
 
 
-   do j = 1,ny,2
-   jj = 1 + (j-1)/2
-   do i = 1,nx,2
-      ii = 1 + (i-1)/2
-      div_ek_out(ii,jj) = div_ek(i,j)
-   enddo
-   enddo
+!  string5 = 'data/Vek'  // '_' // trim(which)
+!  string6 = 'data/forci_qg'  // '_' // trim(which)
+!  string7 = 'data/forci_ag'  // '_' // trim(which)
+!  string8 = 'data/forci_to'  // '_' // trim(which)
+!  string9 = 'data/dissi_u'  // '_' // trim(which)
+!  string10 = 'data/dissi_v'  // '_' // trim(which)
+!  string11 = 'data/q'  // '_' // trim(which)
+!  string12 = 'data/taux'  // '_' // trim(which)
+ string13 = 'data/u_qg'  // '_' // trim(which)
+!  string14 = 'data/u_ag'  // '_' // trim(which)
+ string15 = 'data/v_qg'  // '_' // trim(which)
+!  string16 = 'data/v_ag'  // '_' // trim(which)
+!  string17 = 'data/eta_qg'  // '_' // trim(which)
+!  string18 = 'data/eta_ag'  // '_' // trim(which)
+   string20 = 'data/zeta_G' // '_' // trim(which)
+   string21 = 'data/zeta_AG' // '_' // trim(which)
+
+! Note indices for (u,v,eta ...) starting with 0, useful part is 1:256
+  !  real u_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz), v_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
+  !  real div_ek_out(0:nx/subsmprto+1,0:ny/subsmprto+1), eta_out(0:nx/subsmprto+1,0:ny/subsmprto+1,nz)
+ 
+   div_ek_out=div_ek(isubx,isuby)
 
    do k = 1,nz
-   do j = 1,ny,2
-   jj = 1 + (j-1)/2
-   do i = 1,nx,2
-      ii = 1 + (i-1)/2
-      u_out(ii,jj,k) = u(i,j,k,3)
-      v_out(ii,jj,k) = v(i,j,k,3)
-      eta_out(ii,jj,k) = eta(i,j,k,3)
-      Uek_out(ii,jj) = Uek(i,j,2)
-      Vek_out(ii,jj) = Vek(i,j,2)
+   u_out(:,:,k)=u(isubx,isuby,k,3)
+   v_out(:,:,k)=v(isubx,isuby,k,3)
+   eta_out(:,:,k)=eta(isubx,isuby,k,3)
    enddo
-   enddo
-   enddo
+
    open(unit=14,file=string1,access='DIRECT',&
-        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2)*2)
-!       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-!  write(14,REC=1) u(:,:,:,3)
-   write(14,REC=1) u_out(:,:,:)
+        & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isubx)*nz))
+   write(14,REC=1) (((u_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+
    close(14)
   
    open(unit=15,file=string2,access='DIRECT',&
-        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2)*2)
-!       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-!  write(15,REC=1) v(:,:,:,3)
-   write(15,REC=1) v_out(:,:,:)
+        & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+        write(15,REC=1) (((v_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
    close(15)
   
   open(unit=16,file=string3,access='DIRECT',&
-        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2)*2)
-!      & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-! write(16,REC=1) eta(:,:,:,3)
-  write(16,REC=1) eta_out(:,:,:)
+        & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+        write(16,REC=1) (((eta_out(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
   close(16)
   
   open(unit=17,file=string4,access='DIRECT',&
-        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
-!      & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
-! write(17,REC=1) div_ek(:,:)
-   write(17,REC=1) div_ek_out(:,:)
-   close(17)
+        & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)))
+        write(17,REC=1) ((div_ek_out(i,j),i=1,nx/subsmprto),j=1,ny/subsmprto)
+  close(17)
   
    open(unit=18,file=string5,access='DIRECT',&
          & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
@@ -87,9 +71,6 @@
    write(19,REC=1) Vek_out(:,:)
    close(19)
   
-
-
-
 
 !  open(unit=18,file=string5,access='DIRECT',&
 !       & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx+2)*(ny+2)*2)
@@ -166,3 +147,12 @@
 !   write(32,REC=1) div_ek(:,:)
 !   close(32)
 
+  open(unit=33,file=string20,access='DIRECT',&
+  & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+  write(33,REC=1) (((zeta_G(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(33)
+
+  open(unit=34,file=string21,access='DIRECT',&
+  & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+  write(34,REC=1) (((zeta_AG(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+  close(34)
