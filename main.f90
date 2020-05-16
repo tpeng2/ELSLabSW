@@ -160,12 +160,13 @@
       write(*,*) 'Spectrum time series has', ntsrow, 'lines'
       write(*,*) 'dx = ', dx
 
-      include 'subs/initialize_forcing.f90'
 
       !! --- Initialization !!
       include 'subs/initialize.f90'
       its=1
       itlocal=1
+      include 'subs/initialize_forcing.f90'
+
       if(restart==.false.)   nspecfile=0
       write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
       ! !forcing
