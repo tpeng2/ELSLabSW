@@ -61,15 +61,15 @@
         write(17,REC=1) ((div_ek_out(i,j),i=1,nx/subsmprto),j=1,ny/subsmprto)
   close(17)
   
-   open(unit=18,file=string5,access='DIRECT',&
-         & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
-   write(18,REC=1) Uek_out(:,:)
-   close(18)
+!  open(unit=18,file=string5,access='DIRECT',&
+!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
+!  write(18,REC=1) Uek_out(:,:)
+!  close(18)
   
-   open(unit=19,file=string6,access='DIRECT',&
-         & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
-   write(19,REC=1) Vek_out(:,:)
-   close(19)
+!  open(unit=19,file=string6,access='DIRECT',&
+!        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
+!  write(19,REC=1) Vek_out(:,:)
+!  close(19)
   
 
 !  open(unit=18,file=string5,access='DIRECT',&
