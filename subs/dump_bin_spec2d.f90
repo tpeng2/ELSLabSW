@@ -150,21 +150,21 @@
     string13i = 'specdata/eta_fft_i'  // '_' // trim(which3)
     open(unit=9979,file=string13,access='DIRECT',&
     & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9979,REC=1) (real(etafft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    write(9979,REC=1) ((real(etafft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
     close(9979)
     open(unit=9978,file=string13i,access='DIRECT',&
     & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9978,REC=1)  (aimag(etafft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    write(9978,REC=1)  ((aimag(etafft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
     close (9978)
 
     ! ETA-G FFT (Geostrophic part, for potential energy)
     string14 = 'specdata/eta_qgfft_r'  // '_' // trim(which3)
     string14i = 'specdata/eta_qgfft_i'  // '_' // trim(which3)
     open(unit=9977,file=string14,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
     write(9977,REC=1) (real(eta_qgfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
     close(9977)
     open(unit=9976,file=string14i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
     write(9976,REC=1) (aimag(eta_qgfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
     close (9976)

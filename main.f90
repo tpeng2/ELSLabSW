@@ -92,8 +92,8 @@
       real*4 kex1_spec_tb(0:nx/2,1:ntsrow),key1_spec_tb(0:ny/2,1:ntsrow),tstime(1:ntsrow)
       real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
       real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
-      double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft
-      double complex,dimension(nx/2+1,ny) :: etafft,ftotalfft,fagfft,div_fft
+      double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,etafft
+      double complex,dimension(nx/2+1,ny) :: ftotalfft,fagfft,div_fft
 
       double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_qgfft,v_qgfft
       double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc
@@ -565,8 +565,19 @@
                datr(:,:) = v_qg(1:nx,1:ny,2)
                include 'fftw_stuff/spec1.f90'
                v_qgfft(:,:,2)=datc
-   
-   
+               
+               datr(:,:) = eta(1:nx,1:ny,1,3)
+               include 'fftw_stuff/spec1.f90'
+               etafft(:,:,1)=datc
+
+               datr(:,:) = eta(1:nx,1:ny,2,3)
+               include 'fftw_stuff/spec1.f90'
+               etafft(:,:,2)=datc
+
+               datr(:,:) = eta_qg(1:nx,1:ny)
+               include 'fftw_stuff/spec1.f90'
+               eta_qgfft(:,:)=datc
+
                u_agfft_bc=u_agfft(:,:,2)-u_agfft(:,:,1)
                v_agfft_bc=v_agfft(:,:,2)-v_agfft(:,:,1)
                ! write(*,*) '2D FFT/spec done, its,time,iftcount',its,time/86400,iftcount
