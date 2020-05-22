@@ -1,6 +1,6 @@
 ! FFT subsample setting
 if (ftsubsmprto.ne.1) then
-    write(*,*) 'ftsubsmprtio',ftsubsmprtio,'==> Fourier spaces is partialy sampled'
+    write(*,*) 'ftsubsmprto',ftsubsmprto,'==> Fourier spaces is partialy sampled'
     if(nx==256) then
         szftrdrow=4812
         open (unit=99, file='kxky_subsmp_nx_256.txt', status='old', action='read')
@@ -19,7 +19,7 @@ if (ftsubsmprto.ne.1) then
         iftsubkl(inkrow,2)=rdsubl+1 !nl
     end do
 else !if (fftsumbsmp==1)
-    write(*,*) 'ftsubsmprtio',ftsubsmprtio,'==> Fourier spaces is fully sampled'
+    write(*,*) 'ftsubsmprto',ftsubsmprto,'==> Fourier spaces is fully sampled'
     if(nx==256) then
         szftrdrow=33024
         open (unit=99, file='kxky_full_nx_256.txt', status='old', action='read')

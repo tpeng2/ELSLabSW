@@ -29,8 +29,9 @@
       end module data_initial
 
       program main
-
       use data_initial
+      implicit none
+      real ran2
       real u(0:nnx,0:nny,nz,3), v(0:nnx,0:nny,nz,3), eta(0:nnx,0:nny,nz,3)
       real u_ag(0:nnx,0:nny,nz), v_ag(0:nnx,0:nny,nz)
       real u_qg(0:nnx,0:nny,nz), v_qg(0:nnx,0:nny,nz)
@@ -76,6 +77,7 @@
       real x, y, z, ramp, ramp0, time, today
       real Lrossby
       ! real amp_matrix(864000) !3000 days
+      real amp_forcing, amp, rms_amp, ampfactor, Omgrange !initialize_forcing
       real amp_matrix(nsteps+1),time_tmp(nsteps+1),amp_save,amp_load !nsteps+1 days
       real,allocatable:: amp_matrix_rand(:)
       real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
@@ -102,7 +104,8 @@
       real,dimension(nx/2+1,ny,2) :: omega_p ! omega field for poincaire plus and minus
       real sgn1,tmp2,tmp3
       double complex,dimension(nx/2+1,ny) :: kappa_ijsq,M !kappa**2 at (i,j) 
-      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km, it, its, imode, ntimes, inkrow
+      integer i, j, k, ii, jj, kk, ip, im, jp, jm, kp, km
+      integer ilevel, itt,  it, its, imode, ntimes, inkrow
       
       !subsampling arrays
       integer,allocatable:: isubx(:),isuby(:),iftsubkl(:,:)
@@ -140,6 +143,7 @@
       szsuby=ceiling(ny/(subsmprto+1e-15))
       ! szftrdrow=ceiling((nx/2+1)/(ftsubsmprto+1e-15))
       ! szftrdcol=ceiling(ny/(ftsubsmprto+1e-15))
+      allocate(isubx(szsubx),isuby(szsuby))
       ! === Define subsampling range in spatial space
       isubx=(/(i, i=1,nx, subsmprto)/)
       isuby=(/(i, i=1,ny, subsmprto)/)
@@ -291,7 +295,7 @@
          end if
 
          !        =================
-         if ( mod(its,iout*10).eq.1 ) then
+         if ( mod(its,iout*10).eq.0 ) then
          write(*,*) 'current time step, iout', its, iout
          !shuffle forcing terms
          ! call shuffle_phi
@@ -413,6 +417,7 @@
             if ( mod(its,iout).eq.0 ) then  ! output 
                icount = icount + 1
                include 'subs/dump_bin.f90'
+               if(mod(its,iout).eq.0)write(*,*) 'current its',its
                print*, 'writing data No.', icount
             end if
 
