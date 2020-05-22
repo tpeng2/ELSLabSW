@@ -831,7 +831,7 @@ FUNCTION gasdev(idum)
       real,intent(in):: taux_steady_in(0:nnx,0:nny),amp_in
       real,intent(out)::taux_out(0:nnx,0:nny)
       if (forcingtype==0) then
-         taux_out(:,:) = taux_steady_in(:,:) +  c_tauvar*sqrt(tau0)*amp_in
+         taux_out(:,:) = taux_steady_in(:,:) +  c_tauvar*tau0*amp_in
       elseif(forcingtype==1) then
          taux_out(:,:) = taux_steady_in(:,:)*(1.+amp_in)
       endif

@@ -72,7 +72,7 @@
          enddo
          close (20)
          write(*,*) 'Amp_matrix after normalization is stored, scale factor',ampfactor*2.0
-         write(*,*) 'time_tmp, read first forcing step', time_tmp, amp_matrix(its)
+         ! write(*,*) 'time_tmp, read first forcing step', time_tmp, amp_matrix(its)
     !   else if(iou_method==2) then
     !      write(*,*)'iou_method=2, Euler-method for stochastic Lagevin equation'
     !      ! the first step
