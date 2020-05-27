@@ -414,7 +414,7 @@
                include 'subs/diags.f90'
             end if
             
-            if ( mod(its,iout).eq.0 ) then  ! output 
+            if (save_movie.and. mod(its,iout).eq.0 ) then  ! output 
                icount = icount + 1
                include 'subs/dump_bin.f90'
                if(mod(its,iout).eq.0)write(*,*) 'current its',its
