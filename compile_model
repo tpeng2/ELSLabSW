@@ -1,17 +1,28 @@
 #!/bin/bash
 #read -p "Enter case folder name:  " ${case}
 case=$1
-read -p "!! Enter machin: 0) Oxygen or 1) for local mac:" pcid
+	read -p "!! Enter machin: 0) Oxygen with scratch; 1) local mac with scratch; 2) ptz-poisson; 3) mac_solo" pcid
 #read pcid
-if [ "${pcid}" = "0" ]
-	then 
-	    machine_name=Oxygen
-	    fftw_path=/usr/include
- 	    data_path=/scratch/tpeng/
-	else
- 	    machine_name=local_mac
-	    fftw_path=/usr/local/include
-	    data_path=/Volumes/scratch/
+if [ "${pcid}" == "0" ]
+then 
+    machine_name=Oxygen
+    fftw_path=/usr/include
+    data_path=/scratch/tpeng/
+elif [ "${pcid}" == "1" ] 
+then
+    machine_name=mac_scratch_mounted
+    fftw_path=/usr/local/include
+    data_path=/Volumes/scratch/
+elif [ "${pcid}" == "2" ] 
+then
+    machine_name=ptz-poisson
+    fftw_path=/usr/include
+    data_path=./
+elif [ "${pcid}" == "3" ] 
+then
+    machine_name=mac_solo
+    fftw_path=/usr/local/include
+    data_path=./
 fi
 echo "!! ${pcid} was selected"
 echo "!! Using setting for ${machine_name} with fftw stored at ${fftw_path}"
