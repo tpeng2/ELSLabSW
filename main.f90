@@ -351,6 +351,9 @@
          !
          ilevel = 3
          include 'subs/p_correction.f90'
+         ! Psurf  = Psurf/dt   (here, not after the next line
+         ! see in p_correction for the /dt
+         ! see also lines 264 265 for 1st time step
          include 'subs/p_correction.f90'
 
          do k = 1,nz
