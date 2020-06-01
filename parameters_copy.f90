@@ -7,7 +7,7 @@
  
    parameter ( Lx = 2.0e6, Ly = Lx )
  
-   parameter ( nx = 2**8, ny = 2**8, nz = 2 )
+   parameter ( nx = 2**9, ny = 2**9, nz = 2 )
  
    parameter ( dx = Lx/nx, dy = Ly/ny )
  
@@ -24,30 +24,30 @@
  
    parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
  
-   parameter ( Ah = 1.e-5*dx**4 )
+   parameter ( Ah = 2.5e-6*dx**4 )
  
    parameter ( rf = 0.001 )
  
    parameter ( c_bc = 2.0 )
  
-   parameter ( hek = 50.0 )   
+   parameter ( hek = 50.0e8 )   
  
   ! ---  Time ---
  
    parameter ( dt = 300. )
   
-   parameter ( ndays= 0600., totaltime = 86400 * ndays )
+   parameter ( ndays= 0520., totaltime = 86400 * ndays )
  
-   parameter ( nsteps = totaltime/dt,fileperday=12 )
+   parameter ( nsteps = totaltime/dt,fileperday=05 )
  
  ! parameter ( iout = 9 , i_diags = ifix(86400./16/dt) )
    parameter ( iout = nsteps/ndays/fileperday, i_diags = ifix(86400./16/dt))
   
-   parameter (itape=86400*10/dt,ispechst=12) !spectrum output file, output one spectra per ispechst
+   parameter (itape=86400*10/dt,ispechst=18) !spectrum output file, output one spectra per ispechst
  
    parameter(save2dfft=.true.,calc1Dspec=.false. )
  
-   parameter ( start_movie = 1. , subsmprto=1, ftsubsmprto=2, save_movie=.true. )
+   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
  
    parameter ( ifsteady = .false., forcingtype=0, iou_method=1) 
    ! forcingtype =0, zero spatial mode tau0+amp_matrix =1 tau0*(1+amp_matrix)
@@ -56,5 +56,5 @@
    parameter ( restart = .true. , use_ramp = .false. )
  !  parameter ( restart = .false. , use_ramp = .false. )
  
-   parameter ( c_theta=5.*f0, c_mu=0.,  c_sigma=0.1,c_tauvar=c_sigma)
+   parameter ( c_theta=5.*f0, c_mu=0.,  c_sigma=0.1,c_tauvar=0.45)
 

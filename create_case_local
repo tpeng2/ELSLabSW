@@ -1,0 +1,9 @@
+#!/bin/bash
+
+casename=$1
+data_path=./
+case_dir=${data_path}${casename}/
+mkdir ${case_dir}
+mkdir ${case_dir}data ${case_dir}specdata
+cp ./kxky* ${case_dir} 
+cp  ./parameters_copy.f90 ${case_dir}/parameters.f90 

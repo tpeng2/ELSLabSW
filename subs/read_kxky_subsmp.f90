@@ -7,6 +7,9 @@ if (ftsubsmprto.ne.1) then
     elseif(nx==512) then
         szftrdrow=6207
         open (unit=99, file='kxky_subsmp_nx_512.txt', status='old', action='read')
+    elseif(nx==1024) then
+        szftrdrow=7165
+        open (unit=99, file='kxky_subsmp_nx_1024.txt', status='old', action='read')    
     end if
     
     szftrdcol=2
@@ -26,6 +29,9 @@ else !if (fftsumbsmp==1)
     elseif(nx==512) then
         szftrdrow=131584
         open (unit=99, file='kxky_full_nx_512.txt', status='old', action='read')
+    elseif(nx==1024) then
+        szftrdrow=525312
+        open (unit=99, file='kxky_full_nx_1024.txt', status='old', action='read')    
     end if
     
     szftrdcol=2
