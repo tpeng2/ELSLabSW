@@ -17,7 +17,7 @@ if (ftsubsmprto.ne.1) then
 
     do inkrow = 1,szftrdrow
         read(99, *) rdsubk,rdsubl
-        write(*,*) '(n_k,n_l)',rdsubk,rdsubl
+        !write(*,*) '(n_k,n_l)',rdsubk,rdsubl
         iftsubkl(inkrow,1)=rdsubk+1 !nk=0 ==> index =1
         iftsubkl(inkrow,2)=rdsubl+1 !nl
     end do
@@ -39,7 +39,7 @@ else !if (fftsumbsmp==1)
 
     do inkrow = 1,szftrdrow
         read(99, *) rdsubk,rdsubl
-        write(*,*) '(n_k,n_l)',rdsubk,rdsubl
+        !write(*,*) '(n_k,n_l)',rdsubk,rdsubl
         iftsubkl(inkrow,1)=rdsubk+1 !nk=0 ==> index =1
         iftsubkl(inkrow,2)=rdsubl+1 !nl
     end do

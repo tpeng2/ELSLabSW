@@ -4,7 +4,7 @@ casename=$1
 data_path=/scratch/tpeng/
 case_dir=${data_path}${casename}/
 mkdir ${case_dir}
-mkdir ${case_dir}data ${case_dir}specdata
+mkdir ${case_dir}data ${case_dir}specdata ${case_dir}rst
 cp ./kxky* ./parameters_copy.f90 ${case_dir} 
 ln -s ${data_path}${casename}/ .
 
