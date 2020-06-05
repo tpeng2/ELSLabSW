@@ -99,6 +99,13 @@
    close(121)
 
   
+   ! PSI
+   string22 = 'data/PSI' // '_' // trim(which)
+   open(unit=122,file=string22,access='DIRECT',&
+   & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isuby)*nz))
+   write(122,REC=1) (((psi(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+   close(122)
+
 !  open(unit=18,file=string5,access='DIRECT',&
 !        & form='UNFORMATTED',status='UNKNOWN',RECL=4*(nx/2+2)*(ny/2+2))
 !  write(18,REC=1) Uek_out(:,:)

@@ -14,6 +14,9 @@
       logical restart, use_ramp, ifsteady
       logical calc1Dspec,save_movie,save2dfft
       real c_theta, c_mu, c_sigma, c_tauvar
+      ! I/O instruction for diognostics, to override, change parameters.f90
+      logical IO_field=.true.,IO_forcing=.true.,IO_QGAG=.true.
+      logical IO_vort=.true.
       include 'parameters.f90'
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
       !random number
