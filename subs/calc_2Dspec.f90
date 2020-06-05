@@ -39,34 +39,42 @@
 
                datr(:,:) = u_ag(1:nx,1:ny,1)
                include 'fftw_stuff/spec1.f90'
+               ke1_ag_spec = ke1_ag_spec + spectrum
                u_agfft(:,:,1)=datc        
    
                datr(:,:) = u_ag(1:nx,1:ny,2)
                include 'fftw_stuff/spec1.f90'
+               ke2_ag_spec = ke2_ag_spec + spectrum
                u_agfft(:,:,2)=datc
    
                datr(:,:) = v_ag(1:nx,1:ny,1)
                include 'fftw_stuff/spec1.f90'
+               ke1_ag_spec = ke1_ag_spec + spectrum
                v_agfft(:,:,1)=datc       
    
                datr(:,:) = v_ag(1:nx,1:ny,2)
                include 'fftw_stuff/spec1.f90'
+               ke2_ag_spec = ke2_ag_spec + spectrum
                v_agfft(:,:,2)=datc
    
                datr(:,:) = u_qg(1:nx,1:ny,1)
                include 'fftw_stuff/spec1.f90'
+               ke1_qg_spec = ke1_qg_spec + spectrum
                u_qgfft(:,:,1)=datc        
    
                datr(:,:) = u_qg(1:nx,1:ny,2)
                include 'fftw_stuff/spec1.f90'
+               ke2_qg_spec = ke2_qg_spec + spectrum
                u_qgfft(:,:,2)=datc
    
                datr(:,:) = v_qg(1:nx,1:ny,1)
                include 'fftw_stuff/spec1.f90'
+               ke1_qg_spec = ke1_qg_spec + spectrum
                v_qgfft(:,:,1)=datc       
    
                datr(:,:) = v_qg(1:nx,1:ny,2)
                include 'fftw_stuff/spec1.f90'
+               ke2_qg_spec = ke2_qg_spec + spectrum
                v_qgfft(:,:,2)=datc
                
                datr(:,:) = Psurf(1:nx,1:ny)

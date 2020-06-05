@@ -2,7 +2,7 @@
       which='_'//trim(adjustl(which2))
       which2='rst/'
       if(its==nsteps) then
-        which2=""
+        which2="./"
         which=""
       end if
       ! ========= I/O for restart files =========
@@ -41,6 +41,33 @@
       enddo
       close(95)
 
+      which3=trim(which2)//'ke1_qg_spec'//trim(adjustl(which))
+      open(94, file =which3 )
+      do i = 1,ny
+         write(94,'(1i4,1e12.4)')i,ke1_qg_spec(i)/nx/nx/ny/ny/count_specs_1
+      enddo
+      close(94)
+
+      which3=trim(which2)//'ke2_qg_spec'//trim(adjustl(which))
+      open(93, file =which3 )
+      do i = 1,ny
+         write(93,'(1i4,1e12.4)')i,ke2_qg_spec(i)/nx/nx/ny/ny/count_specs_1
+      enddo
+      close(93)
+
+      which3=trim(which2)//'ke1_ag_spec'//trim(adjustl(which))
+      open(92, file =which3 )
+      do i = 1,ny
+         write(92,'(1i4,1e12.4)')i,ke1_ag_spec(i)/nx/nx/ny/ny/count_specs_1
+      enddo
+      close(92)
+
+      which3=trim(which2)//'ke2_ag_spec'//trim(adjustl(which))
+      open(91, file =which3 )
+      do i = 1,ny
+         write(91,'(1i4,1e12.4)')i,ke2_ag_spec(i)/nx/nx/ny/ny/count_specs_1
+      enddo
+      close(91)
 
       which3=trim(which2)//'restart'//trim(adjustl(which))
       open(0,file=which3)

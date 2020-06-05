@@ -6,7 +6,7 @@
       double precision pi, twopi, Lx, Ly, dx, dy
       real f0, beta, r_drag, Ah, r_invLap, rf
       real tau0, tau1, hek
-      integer nsteps,fileperday,start_movie
+      integer nsteps,fileperday,start_movie,start_spec
       real ndays,totaltime,dt
       real restart_from
       integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
@@ -15,8 +15,8 @@
       logical calc1Dspec,save_movie,save2dfft
       real c_theta, c_mu, c_sigma, c_tauvar
       ! I/O instruction for diognostics, to override, change parameters.f90
-      logical IO_field=.true.,IO_forcing=.true.,IO_QGAG=.true.
-      logical IO_vort=.true.
+      logical   IO_field, IO_forcing, IO_QGAG
+      logical  IO_psivort, IO_ek
       include 'parameters.f90'
       parameter( ntsrow=itape/ispechst  )! how many lines for a time series table (e.g. spectrum)   
       !random number
@@ -71,6 +71,8 @@
       real qmode(0:nnx,0:nny,nz), psimode(0:nnx,0:nny,nz)
       real u_out(1:(nx/subsmprto),1:(ny/subsmprto),nz)
       real v_out(1:(nx/subsmprto),1:(ny/subsmprto),nz)
+      real Uek_out(1:(nx/subsmprto),1:(ny/subsmprto))
+      real Vek_out(1:(nx/subsmprto),1:(ny/subsmprto))
       real eta_out(1:(nx/subsmprto),1:(ny/subsmprto),nz)
       real div_ek_out(1:(nx/subsmprto),1:(ny/subsmprto))
       real f(0:nny)
@@ -86,8 +88,10 @@
       real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg
       real*4 tmp_out(10)
 
-      !2-D FFT spectra
+      !2-D FFT spectra reduced
       real*4 ke1_spec(0:nx), ke2_spec(0:nx), ke_ek_spec(0:nx)
+      real*4 ke1_qg_spec(0:nx), ke2_qg_spec(0:nx)
+      real*4 ke1_ag_spec(0:nx), ke2_ag_spec(0:nx)
       real*4 for_to_spec(0:nx), for_ag_spec(0:nx)
       !1-D spectra
       real*4 kex1_spec(0:nx/2), kex2_spec(0:nx/2), kex_ek_spec(0:nx/2)
@@ -144,12 +148,20 @@
       ! === Allocate variables
       szsubx=ceiling(nx/(subsmprto+1e-15))
       szsuby=ceiling(ny/(subsmprto+1e-15))
+      write(*,*) 'Physical field subsmpling res.',szsubx,'by',szsuby
       ! szftrdrow=ceiling((nx/2+1)/(ftsubsmprto+1e-15))
       ! szftrdcol=ceiling(ny/(ftsubsmprto+1e-15))
       allocate(isubx(szsubx),isuby(szsuby))
       ! === Define subsampling range in spatial space
       isubx=(/(i, i=1,nx, subsmprto)/)
       isuby=(/(i, i=1,ny, subsmprto)/)
+      do i=1,size(isubx)
+      write(*,*) 'isubx',i,'sub-x indices',isubx(i)
+      end do
+      do j=1,size(isuby)
+      write(*,*) 'isuby',j,'sub-y indices',isuby(j)
+      end do
+      write(*,*) 'Subsampled file size: 4X',size(isubx),'X',size(isubx),'X',nz
       ! === FFT subsmpling, fed with (k,l) pair
       include 'subs/read_kxky_subsmp.f90'
 
@@ -176,28 +188,7 @@
 
       if(restart==.false.)   nspecfile=0
       write(*,*) 'iout,ispechst,ntsrow',iout,ispechst,ntsrow
-      ! !forcing
-      ! Fws=20 !sampling extension (beyond f0)
-      ! f_thrhld=0.2*f0
-      ! n_omega=Fws*ndays !20 per day to construct the curve
-      ! allocate(omega(n_omega),A_n(n_omega),phi(n_omgea))
-      ! delta_omega=2*pi/86400./ndays
-      ! !construct Amp frequency curve
-      ! do i = 1, n_omega !1e*5
-      !    omega(i) = i*delta_omega
-      !    phi(i)= ran2(seed)*2.0*pi
-      !    if(omega(i).le.f_thrhld) then
-      !          A_n(i) = amp
-      !    else
-      !          A_n(i) = amp*(f_thrhld/omega(i))
-      !    endif
-      !    ! write(21,*) omega(i)/f,A_n(i)**2
-      !    ! flush(21)
-      ! enddo
-      ! write(*,*) 'Amp frequency chart is constructed'
-      !apply amp_matrix
-      ! forcing type
-      ! call subroutine get_taux(taux_steady_in,amp_in,taux_out)
+      
       call get_taux(taux_steady,amp_matrix(its),taux)
 
       !==============================================================
@@ -410,8 +401,8 @@
          end if
 
 
-
-         if ( its .gt. start_movie ) then
+         !start diognostics 
+         if ( its .gt. min(start_movie,start_spec) ) then
             ! Diognostic only when outputting physical or Fourier fields
             if(mod(its,ispechst).eq.0.or.mod(its,iout).eq.0) then 
                include 'subs/div_vort.f90'
@@ -427,7 +418,7 @@
                print*, 'writing data No.', icount
             end if
 
-            if ( mod(its,ispechst).eq.0 ) then
+            if ( its.gt.start_spec .and. mod(its,ispechst).eq.0 ) then
                count_specs_1 = count_specs_1 + 1
                count_specs_2 = count_specs_2 + 1 
                count_specs_ek = count_specs_ek + 1
@@ -461,28 +452,6 @@
                      /(c_bc**2*kappa_ijsq)
                    v_agfft_p(:,:,imode)=gprime(2)*eta_agfft(:,:)*(omega_p(:,:,imode)*nky-eye*f0*nkx)&
                      /(c_bc**2*kappa_ijsq)
-               !     ! inverse FFT to physical space
-               !     call dfftw_execute_dft_c2r(pc2r,u_agfft_p(:,:,imode),datr)
-               !     call dfftw_execute_dft_c2r(pc2r,v_agfft_p(:,:,imode),v_ag_p(1:nx,1:ny,imode))
-               !     call dfftw_execute_dft_c2r(pc2r,eta_agfft_p(:,:,imode),eta_ag_p(1:nx,1:ny,imode))            
-                  
-               !     ! interpolate u_ag_p and v_ag_p to corresponding coordinates
-               !     ! eta-grid to v-grid (upward, dirx=0,diry=1)
-               !     call interp_matrix(u_ag_p(:,:,imode),u_ag_p(:,:,imode),-1,0,10)
-               !     ! eta-grid to v-grid (downard, dirx=0,diry=-1)
-               !     call interp_matrix(v_ag_p(:,:,imode),v_ag_p(:,:,imode),0,-1,10)
-               !    !  array1=v_ag_p(:,:,imode)
-               !    !  array2=0.
-               !    !  do ii = 1,10
-               !    !  ! interpolated v from eta-grid to v-grid (going downward)
-               !    !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,0:ny-1))
-               !    !  array2=array2+array
-               !    !  ! inferred v at eta-grid from v-grid (going upward)
-               !    !  array(1:nx,1:ny)= 0.5*(array1(1:nx,1:ny)+array1(1:nx,2:ny+1))
-               !    !  ! get the residual
-               !    !  array1 = v_ag_p(:,:,imode) - array
-               !    !  end do 
-               !    !  v_ag_p(:,:,imode) = array2
                end do ! imode
                ! AG+-mode decomp finished
 
@@ -503,8 +472,11 @@
         if(mod(its,100*288)==0) then
                 include 'subs/writing_restart_files.f90'
         end if
+        if(its==nsteps) then
+         include 'subs/writing_restart_files.f90'
+        end if
       enddo ! its
-      include 'subs/writing_restart_files.f90'
+      !===== time loop ends here
       include 'fftw_stuff/fft_destroy.f90'
       end program main
 

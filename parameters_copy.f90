@@ -47,7 +47,7 @@
  
    parameter(save2dfft=.true.,calc1Dspec=.false. )
  
-   parameter ( start_movie = 1. , subsmprto=4, ftsubsmprto=2, save_movie=.true. )
+   parameter ( start_movie = 1. , start_spec=1., subsmprto=4, ftsubsmprto=2, save_movie=.true. )
  
    parameter ( ifsteady = .false., forcingtype=0, iou_method=1) 
    ! forcingtype =0, zero spatial mode tau0+amp_matrix =1 tau0*(1+amp_matrix)
@@ -58,3 +58,4 @@
  
    parameter ( c_theta=5.*f0, c_mu=0.,  c_sigma=0.1,c_tauvar=0.45)
 
+   parameter ( IO_field=.true.,IO_forcing=.false.,IO_QGAG=.true.,IO_psivort=.true.,IO_ek=.false.)
