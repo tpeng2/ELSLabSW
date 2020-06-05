@@ -6,6 +6,9 @@
   ! ---  Grid ---
  
    parameter ( Lx = 2.0e6, Ly = Lx )
+
+   parameter ( H1 = 1.0e3, Htotal = 4.0e3 )
+
  
    parameter ( nx = 2**9, ny = 2**9, nz = 2 )
  

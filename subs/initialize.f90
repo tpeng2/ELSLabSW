@@ -41,8 +41,8 @@
        for_to_spec(:) = 0.
        for_ag_spec(:) = 0.
 
-       Htot = 4000.
-       H(1) = 1000.
+       Htot = Htotal
+       H(1) = H1
        H(2) = Htot - H(1)
 
        if (nz.eq.2) then

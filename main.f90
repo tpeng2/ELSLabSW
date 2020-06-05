@@ -3,7 +3,7 @@
       character(88) fftw_loc
       integer nx, ny, nz, nnx, nny
       integer i_diags
-      double precision pi, twopi, Lx, Ly, dx, dy
+      double precision pi, twopi, Lx, Ly, dx, dy,H1,Htotal
       real f0, beta, r_drag, Ah, r_invLap, rf
       real tau0, tau1, hek
       integer nsteps,fileperday,start_movie,start_spec
