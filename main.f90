@@ -42,7 +42,7 @@
       real u_ag_p(0:nnx,0:nny,2), v_ag_p(0:nnx,0:nny,2) !two BC-AG modes: also need complex part
       real eta_ag(0:nnx,0:nny), eta_qg(0:nnx,0:nny)
       real eta_ag_p(0:nnx,0:nny,2)
-      real Psurf(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
+      real Psurf(0:nnx,0:nny),Psurf_csum(0:nnx,0:nny), rhs_Psurf(0:nnx,0:nny)
       real div(0:nnx,0:nny), zeta(0:nnx,0:nny)
       real B(0:nnx,0:nny), B_nl(0:nnx,0:nny)
       real div1(0:nnx,0:nny), zeta1(0:nnx,0:nny)
@@ -345,11 +345,14 @@
          !     stuff for surface pressure correction
          !
          ilevel = 3
+         Psurf_csum=0
          include 'subs/p_correction.f90'
+         Psurf_csum=Psurf_csum+Psurf
          ! Psurf  = Psurf/dt   (here, not after the next line
          ! see in p_correction for the /dt
          ! see also lines 264 265 for 1st time step
          include 'subs/p_correction.f90'
+         Psurf_csum=Psurf_csum+Psurf
 
          do k = 1,nz
             array = eta(:,:,k,3)

@@ -15,3 +15,4 @@ parameters.f90
 *.vscode
 parameters.f90_last_compiled
 case*
+.DS_Store

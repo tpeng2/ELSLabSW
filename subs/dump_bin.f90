@@ -1,5 +1,5 @@
 
-  eta(:,:,1,3) = Psurf(:,:)
+  eta(:,:,1,3) = Psurf_csum(:,:) !summation of two-step p-correction; !reset to zero for every ilevel=3
   
   WRITE(which,'(I6)') 100000 + icount
      
