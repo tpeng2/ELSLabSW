@@ -5,7 +5,8 @@
       integer i_diags
       double precision pi, twopi, Lx, Ly, dx, dy,H1,Htotal
       real f0, beta, r_drag, Ah, r_invLap, rf
-      real tau0, tau1, hek
+      integer sig_rinvL(2) 
+      real tau0, tau1, hek, kform
       integer nsteps,fileperday,start_movie,start_spec
       real ndays,totaltime,dt
       real restart_from
@@ -178,7 +179,7 @@
       write(*,*) 'one day = ', 86400/dt, 'time steps'
       write(*,*) 'Spectrum time series has', ntsrow, 'lines'
       write(*,*) 'dx = ', dx
-
+      write(*,*) 'invLap dissipation flag',sig_rinvL
 
       !! --- Initialization !!
       include 'subs/initialize.f90'

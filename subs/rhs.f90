@@ -114,14 +114,14 @@
        &            + 0.25*(f(j)+zeta(i,j))*(vv(i,j)+vv(im,j))   &
        &            + 0.25*(f(jp)+zeta(i,jp))*(vv(i,jp)+vv(im,jp))   &
        &            - Ah*grad4u(i,j)   &
-       &            + r_invLap*invLap_u(i,j)   &
+       &            + r_invLap*invLap_u(i,j)*sig_rinvL(k)  &
        &            - r_drag*uu_old(i,j)*bot(k)
  
        rhs_v(i,j,k) = -(B(i,j)-B(i,jm))/dy   &
        &            - 0.25*(f(j)+zeta(i,j))*(uu(i,j)+uu(i,jm))   &
        &            - 0.25*(f(jp)+zeta(ip,j))*(uu(ip,j)+uu(ip,jm))   &
        &            - Ah*grad4v(i,j)   &
-       &            + r_invLap*invLap_v(i,j)   &
+       &            + r_invLap*invLap_v(i,j)*sig_rinvL(k)   &
        &            - r_drag*vv_old(i,j)*bot(k)
 
        rhs_eta(i,j,k) = -(uh(ip,j)-uh(i,j))/dx   &

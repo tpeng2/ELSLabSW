@@ -9,7 +9,6 @@
 
    parameter ( H1 = 1.0e3, Htotal = 4.0e3 )
 
- 
    parameter ( nx = 2**9, ny = 2**9, nz = 2 )
  
    parameter ( dx = Lx/nx, dy = Ly/ny )
@@ -19,13 +18,15 @@
  
   ! --- Paraterers ---
  
-   parameter ( tau0 = 1.e-4, tau1 = 1.e-5 )
+   parameter ( tau0 = 1.e-4, tau1 = 1.e-5, kform=3.0 )
  
    parameter ( f0 = 7.e-5, beta = 0. )
  
    parameter ( r_drag = 1.e-7 )
  
    parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
+
+   parameter (sig_rinvL=(/0,1/))
  
    parameter ( Ah = 2.5e-6*dx**4 )
  

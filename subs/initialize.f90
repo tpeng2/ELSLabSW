@@ -59,7 +59,7 @@
 
        do j = 1,ny
           y = -Ly/2. + (j-1)*dy
-          taux_steady(:,j) = tau0*cos(twopi*y/Ly)
+          taux_steady(:,j) = tau0*cos(twopi*kform*y/Ly)
        enddo
        array = taux_steady
        include 'subs/bndy.f90'
