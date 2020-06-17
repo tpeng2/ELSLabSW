@@ -157,7 +157,7 @@
     write(9978,REC=1)  ((aimag(etafft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
     close (9978)
 
-    ! ETA-G FFT (Geostrophic part, for potential energy)
+    ! ETA-G (BC) FFT (Geostrophic part, for potential energy)
     string14 = 'specdata/eta_qgfft_r'  // '_' // trim(which3)
     string14i = 'specdata/eta_qgfft_i'  // '_' // trim(which3)
     open(unit=9977,file=string14,access='DIRECT',&
@@ -168,3 +168,27 @@
     & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
     write(9976,REC=1) (aimag(eta_qgfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
     close (9976)
+
+    ! ETA-AG (BC) FFT (Ageostrophic part, for potential energy)
+    string15 = 'specdata/eta_agfft_r'  // '_' // trim(which3)
+    string15i = 'specdata/eta_agfft_i'  // '_' // trim(which3)
+    open(unit=9975,file=string15,access='DIRECT',&
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    write(9975,REC=1) (real(eta_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    close(9975)
+    open(unit=9974,file=string15i,access='DIRECT',&
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    write(9974,REC=1) (aimag(eta_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    close (9974) 
+
+    ! DIV FFT (Geostrophic part, for AG+ and AG- splitting)
+    string16 = 'specdata/div_fft_r'  // '_' // trim(which3)
+    string16i = 'specdata/div_fft_i'  // '_' // trim(which3)
+    open(unit=9973,file=string16,access='DIRECT',&
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    write(9973,REC=1) (real(div_fft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    close(9973)
+    open(unit=9972,file=string16i,access='DIRECT',&
+    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    write(9972,REC=1) (aimag(div_fft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    close (9972) 

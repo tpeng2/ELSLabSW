@@ -134,6 +134,7 @@
       character(88) string11, string12, string13, string14, string15
       character(88) string11i, string12i, string13i, string14i, string15i
       character(88) string16, string17, string18, string19, string20
+      character(88) string16i, string17i, string18i, string19i, string20i
       character(88) string21, string22, string23, string24, string25
       character(88) string99,string98,fmtstr,fmtstr1
 
@@ -415,7 +416,7 @@
                include 'subs/diags.f90'
             end if
             
-            if (save_movie.and. mod(its,iout).eq.0 ) then  ! output 
+            if (save_movie.and. mod(its,iout).eq.0 .and. its.gt.start_movie ) then  ! output 
                icount = icount + 1
                include 'subs/dump_bin.f90'
                if(mod(its,iout).eq.0)write(*,*) 'current its',its
