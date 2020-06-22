@@ -1,7 +1,6 @@
 ! Initialize forcing
   !forcing
    Fws=20 !sampling extension (beyond f0)
-   f_thrhld=0.2*f0
    Omgrange=3000
    n_omega=Fws*Omgrange !20 per day to construct the curve
    allocate(omega(n_omega))

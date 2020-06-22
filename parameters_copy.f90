@@ -22,11 +22,13 @@
  
    parameter ( f0 = 7.e-5, beta = 0. )
  
+   parameter ( f_thrhld=0.1*f0 )
+
    parameter ( r_drag = 1.e-7 )
  
    parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
 
-   parameter (sig_rinvL=(/0,1/))
+   parameter (sig_rinvL=(/0.0,1.0/))
  
    parameter ( Ah = 2.5e-6*dx**4 )
  

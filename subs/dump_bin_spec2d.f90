@@ -24,6 +24,7 @@
     write(9996,REC=1) ((aimag(vfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
     close(9996)
 
+    if (IO_forcing) then
     ! Forcing FFT
     string3 = 'specdata/ftotalfft_r'  // '_' // trim(which3)
     string3i = 'specdata/ftotalfft_i'  // '_' // trim(which3)
@@ -48,53 +49,67 @@
     write(9992,REC=1) (aimag(fagfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
     close(9992)
 
-    ! U-AG (BC) FFT
-    string5 = 'specdata/u_agfft_bc_r'  // '_' // trim(which3)
-    string5i = 'specdata/u_agfft_bc_i'  // '_' // trim(which3)
-    open(unit=9991,file=string5,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-    write(9991,REC=1) (real(u_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
-    close(9991)
-    open(unit=9990,file=string5i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-    write(9990,REC=1) (aimag(u_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
-    close(9990)
+    end if !if IO_forcing
 
-    ! U-AG (BC) FFT
-    string6 = 'specdata/v_agfft_bc_r'  // '_' // trim(which3)
-    string6i = 'specdata/v_agfft_bc_i'  // '_' // trim(which3)
-    open(unit=9989,file=string6,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-    write(9989,REC=1) (real(v_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
-    close(9989)
-    open(unit=9988,file=string6i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-    write(9988,REC=1) (aimag(v_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
-    close(9988)
+    ! ! U-AG (BC) FFT
+    ! string5 = 'specdata/u_agfft_bc_r'  // '_' // trim(which3)
+    ! string5i = 'specdata/u_agfft_bc_i'  // '_' // trim(which3)
+    ! open(unit=9991,file=string5,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    ! write(9991,REC=1) (real(u_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    ! close(9991)
+    ! open(unit=9990,file=string5i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    ! write(9990,REC=1) (aimag(u_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    ! close(9990)
 
-    ! U-AG (POINCARE) FFT
-    string7 = 'specdata/u_agfft_p_r'  // '_' // trim(which3)
-    string7i = 'specdata/u_agfft_p_i'  // '_' // trim(which3)
-    open(unit=9987,file=string7,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9987,REC=1) ((real(u_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
-    close(9987)
-    open(unit=9986,file=string7i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
-    write(9986,REC=1) ((aimag(u_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
-    close(9986)
+    ! ! U-AG (BC) FFT
+    ! string6 = 'specdata/v_agfft_bc_r'  // '_' // trim(which3)
+    ! string6i = 'specdata/v_agfft_bc_i'  // '_' // trim(which3)
+    ! open(unit=9989,file=string6,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    ! write(9989,REC=1) (real(v_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    ! close(9989)
+    ! open(unit=9988,file=string6i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    ! write(9988,REC=1) (aimag(v_agfft_bc(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
+    ! close(9988)
 
-    ! V-AG (POINCARE) FFT
-    string8 = 'specdata/v_agfft_p_r'  // '_' // trim(which3)
-    string8i = 'specdata/v_agfft_p_i'  // '_' // trim(which3)
-    open(unit=9985,file=string8,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9985,REC=1) ((real(v_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
-    close(9985)
-    open(unit=9984,file=string8i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9984,REC=1) ((aimag(v_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
-    close(9984)
+    ! ! U-AG (POINCARE) FFT
+    ! string7 = 'specdata/u_agfft_p_r'  // '_' // trim(which3)
+    ! string7i = 'specdata/u_agfft_p_i'  // '_' // trim(which3)
+    ! open(unit=9987,file=string7,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9987,REC=1) ((real(u_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9987)
+    ! open(unit=9986,file=string7i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
+    ! write(9986,REC=1) ((aimag(u_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9986)
+
+    ! ! V-AG (POINCARE) FFT
+    ! string8 = 'specdata/v_agfft_p_r'  // '_' // trim(which3)
+    ! string8i = 'specdata/v_agfft_p_i'  // '_' // trim(which3)
+    ! open(unit=9985,file=string8,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9985,REC=1) ((real(v_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9985)
+    ! open(unit=9984,file=string8i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9984,REC=1) ((aimag(v_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9984)
+
+    ! ! ETA-AG (POINCARE) FFT
+    ! string8 = 'specdata/eta_agfft_p_r'  // '_' // trim(which3)
+    ! string8i = 'specdata/eta_agfft_p_i'  // '_' // trim(which3)
+    ! open(unit=9985,file=string8,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9985,REC=1) ((real(eta_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9985)
+    ! open(unit=9984,file=string8i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9984,REC=1) ((aimag(eta_agfft_p(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,2)
+    ! close(9984)
 
     ! U-G FFT
     string9 = 'specdata/u_qgfft_r'  // '_' // trim(which3)
@@ -120,30 +135,30 @@
     write(9980,REC=1) ((aimag(v_qgfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
     close (9980)
 
-    !U-AG FFT
-    string11 = 'specdata/u_agfft_r'  // '_' // trim(which3)
-    string11i = 'specdata/u_agfft_i'  // '_' // trim(which3)
-    open(unit=9979,file=string11,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9979,REC=1) ((real(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
-    close(9979)
-    open(unit=9978,file=string11i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9978,REC=1) ((aimag(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
-    close (9978)
+    ! !U-AG FFT
+    ! string11 = 'specdata/u_agfft_r'  // '_' // trim(which3)
+    ! string11i = 'specdata/u_agfft_i'  // '_' // trim(which3)
+    ! open(unit=9979,file=string11,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9979,REC=1) ((real(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+    ! close(9979)
+    ! open(unit=9978,file=string11i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9978,REC=1) ((aimag(u_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+    ! close (9978)
 
-    !V-AG FFT
-    string12 = 'specdata/v_agfft_r'  // '_' // trim(which3)
-    string12i = 'specdata/v_agfft_i'  // '_' // trim(which3)
+    ! !V-AG FFT
+    ! string12 = 'specdata/v_agfft_r'  // '_' // trim(which3)
+    ! string12i = 'specdata/v_agfft_i'  // '_' // trim(which3)
 
-    open(unit=9977,file=string12,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9977,REC=1) ((real(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
-    close(9977)
-    open(unit=9976,file=string12i,access='DIRECT',&
-    & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
-    write(9976,REC=1) ((aimag(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
-    close (9976)
+    ! open(unit=9977,file=string12,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9977,REC=1) ((real(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+    ! close(9977)
+    ! open(unit=9976,file=string12i,access='DIRECT',&
+    ! & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol*nz)
+    ! write(9976,REC=1) ((aimag(v_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2),k)),inkrow=1,szftrdrow),k=1,nz)
+    ! close (9976)
 
     ! ETA FFT (Total potential energy)
     string13 = 'specdata/eta_fft_r'  // '_' // trim(which3)
@@ -158,8 +173,8 @@
     close (9978)
 
     ! ETA-G (BC) FFT (Geostrophic part, for potential energy)
-    string14 = 'specdata/eta_qgfft_r'  // '_' // trim(which3)
-    string14i = 'specdata/eta_qgfft_i'  // '_' // trim(which3)
+    string14 = 'specdata/eta_qgfft_bc_r'  // '_' // trim(which3)
+    string14i = 'specdata/eta_qgfft_bc_i'  // '_' // trim(which3)
     open(unit=9977,file=string14,access='DIRECT',&
     & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
     write(9977,REC=1) (real(eta_qgfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)
@@ -170,8 +185,8 @@
     close (9976)
 
     ! ETA-AG (BC) FFT (Ageostrophic part, for potential energy)
-    string15 = 'specdata/eta_agfft_r'  // '_' // trim(which3)
-    string15i = 'specdata/eta_agfft_i'  // '_' // trim(which3)
+    string15 = 'specdata/eta_agfft_bc_r'  // '_' // trim(which3)
+    string15i = 'specdata/eta_agfft_bc_i'  // '_' // trim(which3)
     open(unit=9975,file=string15,access='DIRECT',&
     & form='BINARY',status='UNKNOWN',RECL=4*szftrdrow*szftrdcol)
     write(9975,REC=1) (real(eta_agfft(iftsubkl(inkrow,1),iftsubkl(inkrow,2))),inkrow=1,szftrdrow)

@@ -5,8 +5,8 @@
       integer i_diags
       double precision pi, twopi, Lx, Ly, dx, dy,H1,Htotal
       real f0, beta, r_drag, Ah, r_invLap, rf
-      integer sig_rinvL(2) 
-      real tau0, tau1, hek, kform
+      real sig_rinvL(2) 
+      real tau0, tau1, hek, kform,f_shrhld
       integer nsteps,fileperday,start_movie,start_spec
       real ndays,totaltime,dt
       real restart_from
@@ -23,7 +23,7 @@
       !random number
       integer iseed,values(8)
       !forcing subroutine
-      real delta_omega,f_thrhld
+      real delta_omega
       integer n_omega,Fws
       real,allocatable :: omega(:),A_n(:),phi(:)
       !for complex number i

@@ -48,6 +48,7 @@
        if (nz.eq.2) then
           gprime(1) = 0.
           gprime(2) = Htot*c_bc**2/H(1)/H(2) 
+          print*, 'gprime=',gprime
        else
           print*, 'bug; need to set gprimes'
           stop
