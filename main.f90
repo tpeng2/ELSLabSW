@@ -6,12 +6,13 @@
       double precision pi, twopi, Lx, Ly, dx, dy,H1,Htotal
       real f0, beta, r_drag, Ah, r_invLap, rf
       real sig_rinvL(2) 
-      real tau0, tau1, hek, kform,f_shrhld
+      real tau0, tau1, hek, kform,f_shrhld,Fs_high,Fs_low,sigma_An
+      integer n_omega
       integer nsteps,fileperday,start_movie,start_spec
       real ndays,totaltime,dt
       real restart_from
       integer subsmprto,itape,ispechst,iout,itlocal,itsrow,ntsrow,nspecfile
-      integer ftsubsmprto,forcingtype, iou_method
+      integer ftsubsmprto,forcingtype, istoc_method,irand_proc
       logical restart, use_ramp, ifsteady
       logical calc1Dspec,save_movie,save2dfft
       real c_theta, c_mu, c_sigma, c_tauvar
@@ -24,7 +25,7 @@
       integer iseed,values(8)
       !forcing subroutine
       real delta_omega
-      integer n_omega,Fws
+      real Fws
       real,allocatable :: omega(:),A_n(:),phi(:)
       !for complex number i
       double complex eye
@@ -83,7 +84,7 @@
       real x, y, z, ramp, ramp0, time, today
       real Lrossby
       ! real amp_matrix(864000) !3000 days
-      real amp_forcing, amp, rms_amp, ampfactor, Omgrange !initialize_forcing
+      real amp_forcing, amp, rms_amp, ampfactor !initialize_forcing
       real amp_matrix(nsteps+1),time_tmp(nsteps+1),amp_save,amp_load !nsteps+1 days
       real,allocatable:: amp_matrix_rand(:)
       real ke1, ke2, ke1_qg, ke2_qg, pe, pe_qg, etot, etot_qg

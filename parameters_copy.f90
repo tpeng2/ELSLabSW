@@ -22,13 +22,13 @@
  
    parameter ( f0 = 7.e-5, beta = 0. )
  
-   parameter ( f_thrhld=0.1*f0 )
+   parameter ( f_thrhld=0.2*f0, Fs_high= 30.0, Fs_low=1/30.0) !cut-off, high, and low sampled transient forcings
 
-   parameter ( r_drag = 1.e-7 )
- 
-   parameter ( r_invLap = 1.e-6*twopi**2/Ly**2 )
+   parameter ( n_omega=10000, sigma_An=0.6*f0)
 
-   parameter (sig_rinvL=(/0.0,1.0/))
+   parameter ( r_invLap = 1.e-6*twopi**2/Ly**2, r_drag = 1.e-7)
+
+   parameter ( sig_rinvL=(/0.0,1.0/) )
  
    parameter ( Ah = 2.5e-6*dx**4 )
  
@@ -51,14 +51,13 @@
   
    parameter (itape=86400*10/dt,ispechst=18) !spectrum output file, output one spectra per ispechst
  
-   parameter(save2dfft=.true.,calc1Dspec=.false. )
+   parameter( save2dfft=.true., calc1Dspec=.false.)
  
    parameter ( start_movie = 1. , start_spec=1., subsmprto=4, ftsubsmprto=2, save_movie=.true. )
  
-   parameter ( ifsteady = .false., forcingtype=0, iou_method=1) 
+   parameter ( ifsteady = .false., forcingtype=0, istoc_method=1, irand_proc=1) 
    ! forcingtype =0, zero spatial mode tau0+amp_matrix =1 tau0*(1+amp_matrix)
-   ! iou_method =0, read amp_matrix, =1,generate amp_matrix in the same way
- 
+   ! istoc_method =0, read amp_matrix, =1,generate amp_matrix in the same way
    parameter ( restart = .true. , use_ramp = .false. )
  !  parameter ( restart = .false. , use_ramp = .false. )
  
