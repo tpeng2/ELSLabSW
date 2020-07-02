@@ -28,14 +28,22 @@
                A_n(i) = amp*(f_thrhld/omega(i))
          endif
       elseif (irand_proc==1) then
-         A_n(i)=1/sqrt(real(n_omega))*exp(-((omega(i)-f_thrhld)/(2*sigma_An))**2)
+         A_n(i)=1/sigma_An/sqrt(2*pi)*exp(-((omega(i)-f_thrhld)/(sigma_An))**2.0/2.0)
+      elseif (irand_proc==2) then !Fs_high here is a dummy variable
+         if(omega(i).le.Fs_low) then
+            A_n(i) = 1e-15
+         elseif (omega(i).gt.Fs_low .and.omega(i).le.f_thrhld ) then
+            A_n(i) = amp
+         elseif (omega(i).gt.f_thrhld ) then
+            A_n(i) = amp*(f_thrhld/omega(i))
+         endif
       end if !irand_proc
    enddo
 
    open(unit=21,file='forcing_frequency_dist.dat',access='sequential',form='formatted',action='write')
   
    do i = 1, n_omega !1e*5
-      write(21,'(3e15.6)') omega(i)/f0,A_n(i)**2,phi(i)
+      write(21,'(3e15.6)') omega(i)/f0,A_n(i),phi(i)
    end do
    
    close(21)
@@ -68,15 +76,22 @@
          do itt = 1, nsteps
             time_tmp(itt) = (itt-1)*dt
             amp_forcing = 0.
-            amp_forcing=sum(A_n*sin(omega*time_tmp(itt)+phi)) !over omega (frequencies)
+            do i = 1, n_omega !1e*5
+            amp_forcing=amp_forcing+(A_n(i)*sin(omega(i)*time_tmp(itt)+phi(i))) !over omega (frequencies)
+            end do
             amp_matrix(itt)=amp_forcing
-            rms_amp = rms_amp + amp_forcing**2
          enddo
-         rms_amp = rms_amp/nsteps
-         rms_amp = sqrt(rms_amp)
+         ampfactor=sum(amp_matrix)/nsteps !temporary stored as a mean
+         rms_amp=0.0 !initialize
+         do itt = 1,nsteps
+            rms_amp = rms_amp + (amp_matrix(itt)-ampfactor)**2
+         enddo
+         rms_amp = rms_amp/nsteps !normalized by timesteps
+         rms_amp = sqrt(rms_amp) !sine wave RMS
          ampfactor = c_sigma/rms_amp
          amp_matrix=amp_matrix*ampfactor*2.0;
-         write(*,*) 'amp_matrix is devided by c_sigma/rms_amp',c_sigma/rms_amp,'and with a scaling factor',2.0
+         write(*,*) 'amp_matrix is scaled by c_sigma/rms_amp',c_sigma/rms_amp,'and with a scaling factor',2.0
+         write(*,*) 'RMS of amp_matrix is',4.0*c_sigma**2.0
          open(unit=20,file='amp_matrix.dat',access='sequential',form='formatted',action='write')
          do itt = 1, nsteps
             write(20,'(2e15.6)') time_tmp(itt)/86400, amp_matrix(itt)

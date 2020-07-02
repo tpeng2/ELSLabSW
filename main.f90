@@ -396,7 +396,7 @@
          enddo
          enddo
 
-         write(300,'(i6,1f12.4,3e12.4)'),its, time/86400.,taux(nx/2,ny/2), ke1/nx/ny, ke2/nx/ny
+         write(300,'(i6,1f12.4,3e12.4)'),its, today,taux(nx/2,ny/2), ke1/nx/ny, ke2/nx/ny
          call flush(300)
 
          if(nsteps.lt.start_movie.and.save_movie) then
@@ -619,7 +619,7 @@ FUNCTION gasdev(idum)
       real,intent(in):: taux_steady_in(0:nnx,0:nny),amp_in
       real,intent(out)::taux_out(0:nnx,0:nny)
       if (forcingtype==0) then
-         taux_out(:,:) = taux_steady_in(:,:) +  c_tauvar*tau0*amp_in
+         taux_out(:,:) = taux_steady_in(:,:) +  c_tauvar*tau1*amp_in
       elseif(forcingtype==1) then
          taux_out(:,:) = taux_steady_in(:,:)*(1.+amp_in)
       endif
