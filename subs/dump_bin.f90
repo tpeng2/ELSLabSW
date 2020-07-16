@@ -87,8 +87,16 @@
   
   if (IO_QGAG) then
       string13 = 'data/u_qg'  // '_' // trim(which)
+      open(unit=113,file=string13,access='DIRECT',&
+      & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isubx)*nz))
+      write(113,REC=1) (((u_qg(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+      close(113)
   !  string14 = 'data/u_ag'  // '_' // trim(which)
       string15 = 'data/v_qg'  // '_' // trim(which)
+      open(unit=115,file=string15,access='DIRECT',&
+      & form='BINARY',status='UNKNOWN',RECL=4*(size(isubx)*size(isubx)*nz))
+      write(115,REC=1) (((v_qg(i,j,k),i=1,nx/subsmprto),j=1,ny/subsmprto),k=1,nz)
+      close(115)
   !  string16 = 'data/v_ag'  // '_' // trim(which)
   end if !IO_QGAG
 
