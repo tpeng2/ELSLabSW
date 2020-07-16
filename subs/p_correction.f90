@@ -31,8 +31,8 @@
        enddo
        rhs_Psurf(:,:) = rhs_Psurf(:,:)/Htot !/dt
 !
-!      rhs_Psurf is vert average of d/dt (div u) 
-!      -grad^2 p = -rhs_Psurf so that the corrected flow in non-divergent
+!      rhs_Psurf is vert average of d/dt (div u) *dt
+!      -grad^2 p = -rhs_Psurf so that the corrected flow in non-divergent, (p=p/rho)
 !      N.B. the multiplication and division by dt is omitted
 !      
 !      solve nabla^2 P_surf = rhs_Psurf
