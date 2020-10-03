@@ -102,7 +102,7 @@
       real*4 kex2_spec_tb(0:nx/2,1:ntsrow),key2_spec_tb(0:ny/2,1:ntsrow)
       real*4 kex_ek_spec_tb(0:nx/2,1:ntsrow),key_ek_spec_tb(0:ny/2,1:ntsrow)
       double complex,dimension(nx/2+1,ny,nz) :: ufft,vfft,etafft
-      double complex,dimension(nx/2+1,ny) :: ftotalfft,fagfft,div_fft
+      double complex,dimension(nx/2+1,ny) :: ftotalfft,fagfft,div_fft, Psurffft
 
       double complex,dimension(nx/2+1,ny,nz) :: u_agfft,v_agfft,u_qgfft,v_qgfft
       double complex,dimension(nx/2+1,ny) :: u_agfft_bc,v_agfft_bc,u_gfft_bc,v_gfft_bc

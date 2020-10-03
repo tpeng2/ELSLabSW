@@ -77,7 +77,7 @@
                ke2_qg_spec = ke2_qg_spec + spectrum
                v_qgfft(:,:,2)=datc
                
-               datr(:,:) = Psurf(1:nx,1:ny)
+               datr(:,:) = Psurf_csum(1:nx,1:ny)
                include 'fftw_stuff/spec1.f90'
                etafft(:,:,1)=datc
 
