@@ -127,7 +127,7 @@
        rhs_eta(i,j,k) = -(uh(ip,j)-uh(i,j))/dx   &
        &                -(vh(i,jp)-vh(i,j))/dy   &
        &                - top(k)*(Uek(ip,j,2)-Uek(i,j,2))/dx   & 
-       &                - top(k)*(Vek(i,jp,2)-Uek(i,j,2))/dy 
+       &                - top(k)*(Vek(i,jp,2)-Vek(i,j,2))/dy 
  
        enddo
        enddo
