@@ -1,3 +1,23 @@
+# Table of content
+- [ELSLabSW](#elslabsw)
+  * [Dependent files](#dependent-files)
+  * [Module data_initial](#module-data-initial)
+  * [Parameter file setting (with example values)](#parameter-file-setting--with-example-values-)
+  * [Discretizations](#discretizations)
+    + [Spatial: Finite difference with staggered grids](#spatial--finite-difference-with-staggered-grids)
+    + [Temporal: Leap frog](#temporal--leap-frog)
+  * [Program structure](#program-structure)
+    + [1. Configuration](#1-configuration)
+    + [2. Initialization](#2-initialization)
+    + [3. Subsequent time steps](#3-subsequent-time-steps)
+      - [Computing RHS of *u*, *v*, and *eta*](#computing-rhs-of--u----v---and--eta-)
+      - [pressure correction](#pressure-correction)
+  * [I/O files](#i-o-files)
+    + [Writing Gnuplot files *./subs/dump_gnu.f90*](#writing-gnuplot-files---subs-dump-gnuf90-)
+
+[![sample_video](https://img.youtube.com/vi/mkXkegJEZCk/0.jpg)](https://www.youtube.com/watch?v=mkXkegJEZCk "sample_video")
+
+
 # ELSLabSW
 Slab model + Two-layer shallow water equations
 
